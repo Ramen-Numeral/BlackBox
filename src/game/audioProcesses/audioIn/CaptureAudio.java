@@ -11,12 +11,10 @@ public class CaptureAudio {
     private static final int SILENCE_THRESHOLD = 200; // amplitude
     private static final int SILENCE_LIMIT = 50; // consecutive silent buffers
     private static final int TIMEOUT_SECONDS = 45;
-    private static final String OUTPUT_PATH = "resources/src/userAudio.wav";
 
     /** wrapper fn for audio capture process**/
-    public static String captureUserAudio() throws LineUnavailableException, IOException {
-        saveAudioToFile(record(setupLine()));
-        return OUTPUT_PATH;
+    public static byte[] captureUserAudio() throws LineUnavailableException, IOException {
+        return record(setupLine());
     }
 
     /** Setup and return a ready-to-record line */
@@ -69,17 +67,5 @@ public class CaptureAudio {
         line.stop();
         line.close();
         return out.toByteArray();
-    }
-
-    /** Save raw audio bytes to a WAV file */
-    public static void saveAudioToFile(byte[] audioBytes) throws IOException {
-        AudioFormat format = new AudioFormat(SAMPLE_RATE, SAMPLE_SIZE, 1, true, true);
-        AudioInputStream ais = new AudioInputStream(
-                new ByteArrayInputStream(audioBytes),
-                format,
-                audioBytes.length / format.getFrameSize()
-        );
-        AudioSystem.write(ais, AudioFileFormat.Type.WAVE, new File(OUTPUT_PATH));
-        System.out.println("Recording saved to " + OUTPUT_PATH);
     }
 }

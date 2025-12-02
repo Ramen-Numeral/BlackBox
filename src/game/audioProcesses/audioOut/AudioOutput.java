@@ -1,12 +1,12 @@
-package game.userAudio;
+package game.audioOutput;
 
 import javax.sound.sampled.*;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
 public class AudioOutput {
 
-    /** play wrapper */
     public static void playFile(String filePath) {
         try (AudioInputStream stream = getAudioStream(filePath)) {
             playStream(stream);
@@ -19,13 +19,11 @@ public class AudioOutput {
         }
     }
 
-    /** get the stream */
     public static AudioInputStream getAudioStream(String filePath) throws IOException, UnsupportedAudioFileException {
         File audioFile = new File(filePath);
         return AudioSystem.getAudioInputStream(audioFile);
     }
 
-    /** play a stream*/
     public static void playStream(AudioInputStream audioStream) throws LineUnavailableException, IOException {
         AudioFormat format = audioStream.getFormat();
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
@@ -40,7 +38,42 @@ public class AudioOutput {
                 audioLine.write(buffer, 0, bytesRead);
             }
 
-            audioLine.drain(); // finish playback
+            audioLine.drain();
+        }
+    }
+
+    public static void playByteArray(byte[] audioData) {
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(audioData);
+             AudioInputStream stream = AudioSystem.getAudioInputStream(bais)) {
+
+            playStream(stream);
+
+        } catch (UnsupportedAudioFileException e) {
+            System.err.println("Unsupported audio format in byte array: " + e.getMessage());
+        } catch (LineUnavailableException e) {
+            System.err.println("Audio line unavailable for playback: " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("I/O Error during byte array playback: " + e.getMessage());
+        }
+    }
+
+    public static void main(String[] args) {
+        System.out.println("Audio playback test starting...");
+
+        String audioFile = "test.wav";
+
+        try {
+            AudioOutput.playFile(audioFile);
+            System.out.println("Finished playing file: " + audioFile);
+
+            // Example of using playByteArray:
+            // byte[] wavBytes = loadWavFileToBytes(audioFile);
+            // AudioOutput.playByteArray(wavBytes);
+            // System.out.println("Finished playing byte array.");
+
+        } catch (Exception e) {
+            System.err.println("Error during playback: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

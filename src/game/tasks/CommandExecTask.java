@@ -1,19 +1,18 @@
 package game.tasks;
 
 import game.gameObjects.GameLevel;
+import game.gameObjects.WorldMap;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 
 public class CommandProcessorTask implements Runnable {
 
-    private final ExecutorService executor;
     private final ExecutorService audioExecutor;
     private final BlockingQueue<String> commandQueue;
 
     public CommandProcessorTask(ExecutorService executor, ExecutorService audioExecutor,
                                 BlockingQueue<String> commandQueue) {
-        this.executor = executor;
         this.audioExecutor = audioExecutor;
         this.commandQueue = commandQueue;
     }
@@ -24,7 +23,7 @@ public class CommandProcessorTask implements Runnable {
 
         GameLevel level;
         try {
-            level = new CommandFetchTask("start up").call(); // initial game state
+            level = new CommandFetchTask("start menu").call(); // initial game state
             audioExecutor.submit(new AudioOutTask(level));
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -38,7 +37,6 @@ public class CommandProcessorTask implements Runnable {
                     System.out.println("[PROCESSOR] Received exit command. Ending game loop.");
                     break;
                 }
-
                 level = new CommandFetchTask(command).call(); // update state
                 audioExecutor.submit(new AudioOutTask(level));
             }

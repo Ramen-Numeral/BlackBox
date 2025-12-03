@@ -1,4 +1,4 @@
-package game.envsetup;
+package game.startupRoutine.envsetup;
 
 import java.io.*;
 import java.util.HashMap;
@@ -6,10 +6,9 @@ import java.util.Map;
 
 public class SetEnv {
 
-    private static final Map<String, String> envMap = new HashMap<String, String>();
+    private static final HashMap<String, String> envMap = new HashMap<String, String>();
 
-    public static Map<String, String> load(String path) {
-
+    public static HashMap<String, String> load(String path) {
         try (BufferedReader buff = new BufferedReader(new FileReader(new File(path)))) {
             String line;
             while((line = buff.readLine()) != null){

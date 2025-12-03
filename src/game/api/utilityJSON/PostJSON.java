@@ -1,52 +1,43 @@
 package game.api.utilityJSON;
 
+
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
-import game.envsetup.SetEnv;
+import game.startupRoutine.envsetup.SetEnv;
 
 public class PostJSON {
 
-    /**
-     * Sends a POST request with JSON to the given endpoint and returns the response as a string.
-     */
+    /** Sends a POST request with JSON and returns response as String */
     public static String postJSON(String endpoint, String json) throws IOException {
         return postJSON(endpoint, json, "Authorization", "Bearer " + SetEnv.get("OPENAI_API_KEY"));
     }
 
-    /**
-     * Sends a POST request with JSON to the given endpoint with custom headers.
-     * headers should be passed as key-value pairs: key1, value1, key2, value2, ...
-     */
+    /** Sends a POST request with JSON and custom headers */
     public static String postJSON(String endpoint, String json, String... headers) throws IOException {
-        URL url = new URL(endpoint);
-        URLConnection connection = url.openConnection();
-        connection.setDoOutput(true);
-        connection.setRequestProperty("Content-Type", "application/json");
+        URLConnection conn = new URL(endpoint).openConnection();
+        conn.setDoOutput(true);
+        conn.setRequestProperty("Content-Type", "application/json");
 
-        // Add any additional headers
-        if (headers.length % 2 != 0) {
-            throw new IllegalArgumentException("Headers must be key-value pairs");
-        }
-        for (int i = 0; i < headers.length; i += 2) {
-            connection.setRequestProperty(headers[i], headers[i + 1]);
-        }
+        if (headers.length % 2 != 0) throw new IllegalArgumentException("Headers must be key-value pairs");
+        for (int i = 0; i < headers.length; i += 2) conn.setRequestProperty(headers[i], headers[i + 1]);
 
-        // Write JSON body
-        try (OutputStream out = connection.getOutputStream()) {
-            out.write(json.getBytes("UTF-8"));
-            out.flush();
+        try (OutputStream out = conn.getOutputStream()) { out.write(json.getBytes("UTF-8")); }
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"))) {
+            StringBuilder sb = new StringBuilder(); String line;
+            while ((line = in.readLine()) != null) sb.append(line);
+            return sb.toString();
         }
+    }
 
-        // Read response
-        StringBuilder response = new StringBuilder();
-        try (BufferedReader buff = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"))) {
-            String line;
-            while ((line = buff.readLine()) != null) {
-                response.append(line);
-            }
-        }
+    /** Sends a POST request with JSON and returns InputStream for binary response (Polly) */
+    public static InputStream postJSONBinReturn(String endpoint, String json, String authHeader) throws IOException {
+        URLConnection conn = new URL(endpoint).openConnection();
+        conn.setDoOutput(true);
+        conn.setRequestProperty("Content-Type", "application/json");
+        conn.setRequestProperty("Authorization", authHeader);
 
-        return response.toString();
+        try (OutputStream out = conn.getOutputStream()) { out.write(json.getBytes("UTF-8")); }
+        return conn.getInputStream();
     }
 }

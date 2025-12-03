@@ -1,4 +1,4 @@
-package game.audioOutput;
+package game.audioProcesses.audioOut;
 
 import javax.sound.sampled.*;
 import java.io.ByteArrayInputStream;
@@ -66,10 +66,6 @@ public class AudioOutput {
             AudioOutput.playFile(audioFile);
             System.out.println("Finished playing file: " + audioFile);
 
-            // Example of using playByteArray:
-            // byte[] wavBytes = loadWavFileToBytes(audioFile);
-            // AudioOutput.playByteArray(wavBytes);
-            // System.out.println("Finished playing byte array.");
 
         } catch (Exception e) {
             System.err.println("Error during playback: " + e.getMessage());

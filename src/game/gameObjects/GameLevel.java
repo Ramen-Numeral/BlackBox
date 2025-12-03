@@ -1,4 +1,4 @@
-package game.PlayEvents;
+package game.gameObjects;
 
 import game.api.APICalls;
 import java.io.*;
@@ -145,7 +145,6 @@ public final class GameLevel implements Serializable {
                 "command='" + command + '\'' +
                 ", txtPath='" + txtPath + '\'' +
                 ", played=" + played +
-                ", currentLevel=" + level +
                 ", embeddingSize=" + (embedding != null ? embedding.length : 0) +
                 ", narrationAudioSize=" + (narrationAudio != null ? narrationAudio.length : 0) +
                 ", commandPromptAudioSize=" + (commandPromptAudio != null ? commandPromptAudio.length : 0) +

@@ -1,4 +1,4 @@
-package game.userAudio;
+package game.audioProcesses.audioIn;
 
 import javax.sound.sampled.*;
 import java.io.*;
@@ -69,3 +69,5 @@ public class CaptureAudio {
         return out.toByteArray();
     }
 }
+//TODO make sure to handle in the game logic if there is a timeout to repeat the commands
+//Do something with the threading so the user can interupt the output as the options are being read out.

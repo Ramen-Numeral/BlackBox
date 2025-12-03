@@ -1,7 +1,6 @@
-package game.PlayEvents;
+package game.gameObjects;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -88,4 +87,5 @@ public final class GameState implements Serializable {
     public void setCurrentLevelCommand(String currentLevelCommand) {
         this.currentLevelCommand = currentLevelCommand;
     }
+
 }

@@ -1,5 +1,7 @@
 package game.audioProcesses;
 
+import java.util.stream.IntStream;
+
 public class VectorComparison {
 
     /**
@@ -15,20 +17,20 @@ public class VectorComparison {
         if (ui.length != vi.length)
             throw new IllegalArgumentException("Vectors must have same length");
 
-        double dot = 0.0;
-        double unorm = 0.0;
-        double vnorm = 0.0;
+        double dot = IntStream.range(0, ui.length)
+                .mapToDouble(i -> ui[i] * vi[i])
+                .sum();
 
-        for (int i = 0; i < ui.length; i++) {
-            dot += ui[i] * vi[i];
-            unorm += ui[i] * ui[i];
-            vnorm += vi[i] * vi[i];
-        }
+        double unorm = IntStream.range(0, ui.length)
+                .mapToDouble(i -> ui[i] * ui[i])
+                .sum();
 
-        // Avoid division by zero if either vector is a zero vector
+        double vnorm = IntStream.range(0, ui.length)
+                .mapToDouble(i -> vi[i] * vi[i])
+                .sum();
+
         if (unorm == 0 || vnorm == 0) return 0;
 
-        // (u . v) / (||u|| * ||v||)
         return dot / (Math.sqrt(unorm) * Math.sqrt(vnorm));
     }
 }

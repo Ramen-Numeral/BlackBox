@@ -1,27 +1,30 @@
 package game.startupRoutine.envsetup;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class SetEnv {
 
-    private static final HashMap<String, String> envMap = new HashMap<String, String>();
+    private static final HashMap<String, String> envMap = new HashMap<>();
 
     public static HashMap<String, String> load(String path) {
-        try (BufferedReader buff = new BufferedReader(new FileReader(new File(path)))) {
-            String line;
-            while((line = buff.readLine()) != null){
-                line = line.trim();
-                if (line.isEmpty() || line.startsWith("#")) continue;
-                int eqIdx = line.indexOf('=');
-                if(eqIdx == -1)continue;
-                envMap.put(line.substring(0, eqIdx).trim().toUpperCase()
-                        , line.substring(eqIdx+1).trim());
-            }
+        try (Stream<String> lines = Files.lines(Paths.get(path))) {
+            lines.map(String::trim)                          // trim whitespace
+                    .filter(line -> !line.isEmpty() && !line.startsWith("#")) // ignore blank/comment lines
+                    .forEach(line -> {
+                        int eqIdx = line.indexOf('=');
+                        if (eqIdx != -1) {
+                            envMap.put(line.substring(0, eqIdx).trim().toUpperCase(),
+                                    line.substring(eqIdx + 1).trim());
+                        }
+                    });
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("env file read erro");
+            System.out.println("Env file read error");
         }
         return envMap;
     }
@@ -39,6 +42,4 @@ public class SetEnv {
                 kk -> System.getenv(kk) != null
                         ? System.getenv(kk) : defaultVal);
     }
-
-
 }

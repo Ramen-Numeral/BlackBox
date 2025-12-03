@@ -1,12 +1,12 @@
 package game.startupRoutine;
 
-import game.gameObjects.GameWorld;
+import game.gameObjects.WorldMap;
 import game.startupRoutine.envsetup.SetEnv;
 
 public class StartupRoutine {
     public static void startupRoutine(){
         SetEnv.load(".env");
-        GameWorld.buildLevelMap(SetEnv.get("LEVEL_TXT_DIR"));
+        WorldMap.buildLevelMap(SetEnv.get("LEVEL_TXT_DIR"));
     }
 
 }

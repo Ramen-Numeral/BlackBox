@@ -2,6 +2,7 @@ package game.audioProcesses.audioIn;
 
 import javax.sound.sampled.*;
 import java.io.*;
+import java.util.stream.IntStream;
 
 public class CaptureAudio {
 
@@ -9,15 +10,42 @@ public class CaptureAudio {
     private static final int SAMPLE_SIZE = 16;
     private static final int BUFFER_SIZE = 1024;
     private static final int SILENCE_THRESHOLD = 200; // amplitude
-    private static final int SILENCE_LIMIT = 50; // consecutive silent buffers
+    private static final int SILENCE_LIMIT = 50;       // consecutive silent buffers
     private static final int TIMEOUT_SECONDS = 45;
 
-    /** wrapper fn for audio capture process**/
-    public static byte[] captureUserAudio() throws LineUnavailableException, IOException {
-        return record(setupLine());
+    /** Capture a small chunk for threshold detection */
+    public static byte[] captureAudioChunk() throws LineUnavailableException {
+        try (TargetDataLine line = setupLine()) {
+            line.start();
+            byte[] buffer = new byte[BUFFER_SIZE];
+            line.read(buffer, 0, buffer.length);
+            line.stop();
+            return buffer;
+        }
     }
 
-    /** Setup and return a ready-to-record line */
+    /** Capture full user audio until silence or timeout */
+    public static byte[] captureUserAudio() throws LineUnavailableException, IOException {
+        try (TargetDataLine line = setupLine()) {
+            return record(line);
+        }
+    }
+
+    /** Calculate decibel level of a buffer */
+    public static double calculateDecibels(byte[] audioData) {
+        double meanSquare = IntStream.range(0, audioData.length / 2)
+                .mapToDouble(i -> {
+                    int sample = (audioData[2 * i + 1] << 8) | (audioData[2 * i] & 0xFF);
+                    return sample * sample;
+                })
+                .average()
+                .orElse(0.0);
+
+        double rms = Math.sqrt(meanSquare);
+        return 20 * Math.log10(rms / 32768.0);
+    }
+
+    /** Setup the mic line */
     public static TargetDataLine setupLine() throws LineUnavailableException {
         AudioFormat format = new AudioFormat(SAMPLE_RATE, SAMPLE_SIZE, 1, true, true);
         DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
@@ -26,8 +54,8 @@ public class CaptureAudio {
         return line;
     }
 
-    /** Record audio until silence or timeout, return raw bytes */
-    public static byte[] record(TargetDataLine line) throws IOException {
+    /** Record until silence or timeout */
+    private static byte[] record(TargetDataLine line) throws IOException {
         line.start();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         byte[] buffer = new byte[BUFFER_SIZE];
@@ -39,35 +67,24 @@ public class CaptureAudio {
             int bytesRead = line.read(buffer, 0, buffer.length);
             if (bytesRead > 0) out.write(buffer, 0, bytesRead);
 
-            // check amplitude for silence
-            boolean silent = true;
-            try (DataInputStream dis = new DataInputStream(new ByteArrayInputStream(buffer, 0, bytesRead))) {
-                while (dis.available() >= 2) { // make sure 2 bytes remain
-                    short sample = dis.readShort();
-                    if (Math.abs(sample) > SILENCE_THRESHOLD) {
-                        silent = false;
-                        speechDetected = true;
-                        break;
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            boolean silent = IntStream.range(0, bytesRead / 2)
+                    .mapToObj(i -> {
+                        int sample = (buffer[2 * i + 1] << 8) | (buffer[2 * i] & 0xFF);
+                        return Math.abs(sample) <= SILENCE_THRESHOLD;
+                    })
+                    .allMatch(Boolean::booleanValue);
 
             if (speechDetected) {
-                if (silent) silentCount++;
-                else silentCount = 0;
+                silentCount = silent ? silentCount + 1 : 0;
                 if (silentCount > SILENCE_LIMIT) break;
+            } else if (!silent) {
+                speechDetected = true;
             }
 
-            // timeout
             if ((System.currentTimeMillis() - startTime) / 1000 >= TIMEOUT_SECONDS) break;
         }
 
         line.stop();
-        line.close();
         return out.toByteArray();
     }
 }
-//TODO make sure to handle in the game logic if there is a timeout to repeat the commands
-//Do something with the threading so the user can interupt the output as the options are being read out.

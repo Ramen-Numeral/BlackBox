@@ -6,7 +6,7 @@ import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
 import java.util.Map;
 
-public class GameSaver {
+public class ShutdownRoutine {
 
     public static void registerShutdownHook(final GameState gameState, final Map<String, GameLevel> worldMap) {
 

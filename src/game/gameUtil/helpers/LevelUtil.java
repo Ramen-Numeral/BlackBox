@@ -1,6 +1,6 @@
 package game.gameObjects;
 
-import game.audioProcesses.audioOut.AudioOutput;
+import game.audioUtil.audioOut.AudioOutput;
 
 import java.io.BufferedReader;
 import java.io.File;

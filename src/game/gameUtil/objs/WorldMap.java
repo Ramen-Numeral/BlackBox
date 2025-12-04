@@ -1,16 +1,14 @@
 package game.gameObjects;
 
-import game.commandProcesses.CommandProcessor;
-
+import game.commandUtil.CommandUtil;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Stream;
 
 /**
- * Utility class responsible for scanning the file system, processing level files,
- * precomputing resources (audio, embeddings), and building the foundational
- * level map for the game world.
+ * Core class for the game world.
+ * Holds GameLevel objects and embeddings.
  */
 public final class WorldMap {
     private static final HashMap<String, GameLevel> worldMap = new HashMap<>();
@@ -19,7 +17,6 @@ public final class WorldMap {
     public static void buildLevelMap(String levelTextDir) {
         File dir = new File(levelTextDir);
 
-        // 1. Directory Validation
         if (!dir.exists() || !dir.isDirectory()) {
             throw new IllegalArgumentException("Directory not found or is not a directory: " + levelTextDir);
         }
@@ -29,23 +26,15 @@ public final class WorldMap {
             throw new IllegalArgumentException("No .txt files found in directory: " + levelTextDir);
         }
 
-        // Clear maps for fresh build
         worldMap.clear();
         commandEmbeddings.clear();
+        CommandUtil.initGlobalCommands();
 
-        // Initialize global commands
-        CommandProcessor.initGlobalCommands();
-
-        // 2. Process files using Streams
         Stream.of(files).forEach(txtFile -> {
             try {
-                String txtPath = txtFile.getAbsolutePath();
-                GameLevel newLev = new GameLevel(txtPath);
-
-                // Store in world map
+                GameLevel newLev = new GameLevel(txtFile.getAbsolutePath());
                 worldMap.put(newLev.getCommand(), newLev);
 
-                // Store embedding safely
                 double[] embedding = newLev.getEmbedding();
                 if (embedding != null) {
                     commandEmbeddings.put(newLev.getCommand(), Arrays.copyOf(embedding, embedding.length));
@@ -56,45 +45,27 @@ public final class WorldMap {
             }
         });
 
-        // 3. Ensure map is not empty
         if (worldMap.isEmpty()) {
             throw new RuntimeException("No GameLevels were successfully created. Check error logs for details.");
         }
     }
 
-    // --- Access Getters for World Map ---
-
+    // --- Accessors ---
     public static Map<String, GameLevel> getWorldMap() {
-        if (worldMap.isEmpty()) {
-            System.err.println("Warning: Attempted to access worldMap before initialization. Map is empty.");
-        }
+        if (worldMap.isEmpty()) System.err.println("Warning: worldMap is empty.");
         return worldMap;
     }
 
-    public static GameLevel getLevel(String command) {
-        return worldMap.get(command);
-    }
+    public static GameLevel getLevel(String command) { return worldMap.get(command); }
+    public static boolean contains(String com){ return worldMap.containsKey(com); }
+    public static Set<String> getLevelCommands() { return Collections.unmodifiableSet(worldMap.keySet()); }
+    public static Collection<GameLevel> getAllLevels() { return Collections.unmodifiableCollection(worldMap.values()); }
+    public boolean isEmpty() { return worldMap.isEmpty(); }
 
-    public static Set<String> getLevelCommands() {
-        return Collections.unmodifiableSet(worldMap.keySet());
-    }
-
-    public static Collection<GameLevel> getAllLevels() {
-        return Collections.unmodifiableCollection(worldMap.values());
-    }
-
-    // --- Access Getters for Embeddings Map ---
-
-    public static Set<String> getEmbeddedCommands() {
-        return Collections.unmodifiableSet(commandEmbeddings.keySet());
-    }
-
+    public static Set<String> getEmbeddedCommands() { return Collections.unmodifiableSet(commandEmbeddings.keySet()); }
     public static double[] getCommandEmbedding(String command) {
         double[] embedding = commandEmbeddings.get(command);
         return embedding != null ? Arrays.copyOf(embedding, embedding.length) : null;
     }
-
-    public static Map<String, double[]> getAllCommandEmbeddings() {
-        return Collections.unmodifiableMap(commandEmbeddings);
-    }
+    public static Map<String, double[]> getAllCommandEmbeddings() { return Collections.unmodifiableMap(commandEmbeddings); }
 }

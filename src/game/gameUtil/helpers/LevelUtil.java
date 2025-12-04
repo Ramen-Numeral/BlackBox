@@ -1,6 +1,8 @@
-package game.gameObjects;
+package game.gameUtil.helpers;
 
 import game.audioUtil.audioOut.AudioOutput;
+import game.gameUtil.objs.GameLevel;
+import game.gameUtil.objs.WorldMap;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -10,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-public class GameUtil {
+public class LevelUtil {
 
     public static void playPromptChoices(GameLevel level) {
         level.getAvailableCommands().stream()

@@ -1,4 +1,4 @@
-package game.audioProcesses.audioOut;
+package game.audioUtil.audioOut;
 
 import javax.sound.sampled.*;
 import java.io.ByteArrayInputStream;

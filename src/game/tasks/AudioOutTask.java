@@ -1,7 +1,7 @@
 package game.tasks;
 
-import game.gameObjects.GameLevel;
-import game.gameObjects.GameUtil;
+import game.gameUtil.objs.GameLevel;
+import game.gameUtil.helpers.LevelUtil;
 
 import java.util.concurrent.Callable;
 
@@ -16,8 +16,8 @@ public class AudioOutTask implements Callable<Void> {
     @Override
     public Void call() {
         try {
-            GameUtil.playNarrationAudio(level);
-            GameUtil.playPromptChoices(level);
+            LevelUtil.playNarrationAudio(level);
+            LevelUtil.playPromptChoices(level);
         } catch (Exception e) {
             System.err.println("[OUTPUT THREAD] Audio playback error: " + e.getMessage());
         } finally {

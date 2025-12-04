@@ -1,7 +1,7 @@
-package game.audioProcesses.audioIn;
+package game.audioUtil.audioIn;
 import game.api.APICalls;
-import game.audioProcesses.VectorComparison;
-import game.gameObjects.WorldMap;
+import game.audioUtil.VectorComparison;
+import game.gameUtil.objs.WorldMap;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;

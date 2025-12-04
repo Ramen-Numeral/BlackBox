@@ -1,18 +1,16 @@
 package game.tasks;
 
-import game.gameObjects.GameLevel;
-import game.gameObjects.WorldMap;
+import game.gameUtil.objs.GameLevel;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 
-public class CommandProcessorTask implements Runnable {
+public class CommandExecTask implements Runnable {
 
     private final ExecutorService audioExecutor;
     private final BlockingQueue<String> commandQueue;
-
-    public CommandProcessorTask(ExecutorService executor, ExecutorService audioExecutor,
-                                BlockingQueue<String> commandQueue) {
+    public CommandExecTask(ExecutorService executor, ExecutorService audioExecutor,
+                           BlockingQueue<String> commandQueue) {
         this.audioExecutor = audioExecutor;
         this.commandQueue = commandQueue;
     }

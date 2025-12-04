@@ -1,6 +1,8 @@
-package game.gameObjects;
+package game.gameUtil.objs;
 
 import game.api.APICalls;
+import game.gameUtil.helpers.LevelUtil;
+
 import java.io.*;
 import java.util.*;
 import java.io.Serial;
@@ -19,8 +21,8 @@ public final class GameLevel implements Serializable {
     private boolean played;
 
     public GameLevel(String txtPath) throws IOException {
-        HashMap<String, String> vals = GameUtil.parseLvlTxt(txtPath);
-        this.availableCommands = GameUtil.createAvailableCommand(vals);
+        HashMap<String, String> vals = LevelUtil.parseLvlTxt(txtPath);
+        this.availableCommands = LevelUtil.createAvailableCommand(vals);
         this.command = vals.get("command");
         this.txtPath = txtPath;
         this.narrationAudio = APICalls.textToSpeech(vals.get("speech_text"));

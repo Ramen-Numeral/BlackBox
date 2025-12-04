@@ -1,4 +1,4 @@
-package game.audioProcesses;
+package game.audioUtil;
 
 import java.util.stream.IntStream;
 

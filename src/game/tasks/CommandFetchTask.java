@@ -1,7 +1,7 @@
 package game.tasks;
 
-import game.commandProcesses.CommandProcessor;
-import game.gameObjects.GameLevel;
+import game.commandUtil.CommandUtil;
+import game.gameUtil.objs.GameLevel;
 
 import java.util.concurrent.Callable;
 
@@ -11,7 +11,7 @@ import java.util.concurrent.Callable;
  */
 public class CommandFetchTask implements Callable<GameLevel> {
 
-    private final CommandProcessor processor;
+    private final CommandUtil processor;
     private final String command;
 
     /**
@@ -19,7 +19,7 @@ public class CommandFetchTask implements Callable<GameLevel> {
      * @param command The command to process.
      */
     public CommandFetchTask(String command) {
-        this.processor = new CommandProcessor();
+        this.processor = new CommandUtil();
         this.command = command;
     }
 

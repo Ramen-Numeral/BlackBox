@@ -1,6 +1,6 @@
 package game.api;
 
-import game.startupRoutine.envsetup.SetEnv;
+import game.stateRoutines.envsetup.SetEnv;
 import java.io.IOException;
 import java.io.InputStream;
 import game.api.utilityJSON.BuildJSON;
@@ -40,14 +40,10 @@ public class APICalls {
     /** Converts a .txt file to speech using Amazon Polly and saves as wav */
     public static byte[] textToSpeech(String txt) {
         try {
-            String endpoint = SetEnv.get("AWS_ENDPOINT");
-            String jsonBody = BuildJSON.buildPollyJSON(txt);
 
-            InputStream response = PostJSON.postJSONBinReturn(endpoint, jsonBody, SetEnv.get("POLLY_AUTH_HEADER"));
-
+            InputStream response = postPolly(txt);
             byte[] audioBytes = ParseJSON.pollyParseResponse(response);
             return audioBytes;
-
         } catch (IOException e) {
             throw new RuntimeException("Error calling Polly TTS: " + e.getMessage(), e);
         }

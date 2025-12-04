@@ -1,5 +1,5 @@
 package game.api.utilityJSON;
-import game.startupRoutine.envsetup.SetEnv;
+import game.stateRoutines.envsetup.SetEnv;
 
 import java.io.*;
 import java.util.Base64;
@@ -50,25 +50,8 @@ public class BuildJSON {
                 + "\"input\":\"" + escaped + "\""
                 + "}";
     }
+}
 
 
-    /**
-         * Builds a JSON body for Polly TTS from a text file.
-         * Dynamically uses POLLY_VOICE from environment variables.
-         */
-        public static String buildPollyJSON(String text) throws IOException {
-            // Get voice from environment
-            String voice = System.getenv("POLLY_VOICE");
-            if (voice == null || voice.isEmpty()) {
-                voice = "Joanna"; // default if not set
-            }
 
-            // Build JSON
-            return "{"
-                    + "\"Text\":\"" + text + "\","
-                    + "\"OutputFormat\":\"wav\","
-                    + "\"VoiceId\":\"" + voice + "\""
-                    + "}";
-        }
-    }
 

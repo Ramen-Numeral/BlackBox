@@ -1,7 +1,9 @@
-package game.commandProcesses;
-import game.gameObjects.GameLevel;
-import game.gameObjects.GameState;
-import game.gameObjects.WorldMap;
+package game.commandUtil;
+import game.gameUtil.helpers.StateUtil;
+import game.gameUtil.helpers.WorldUtil;
+import game.gameUtil.objs.GameLevel;
+import game.gameUtil.objs.GameState;
+import game.gameUtil.objs.WorldMap;
 import game.stateRoutines.envsetup.SetEnv;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
@@ -11,7 +13,7 @@ import java.util.List;
 
 
 //command routing
-public class CommandProcessor {
+public class CommandUtil {
 
     private static final String SAVE_FILE_PATH = "savegame.dat";
     private static GameLevel prevLevel = WorldMap.getLevel("start");
@@ -39,17 +41,17 @@ public class CommandProcessor {
         globalCommands.add("new game");
     }
 
-    //TODO
+
     public GameLevel exitProcess(){
         systemExitRoutine();
         return levelProcess("exit"); //never returns hard jvm exit
     }
     public GameLevel saveProcess(){
-        GameState.saveGame(WorldMap.getWorldMap(), CommandProcessor.getLastLev().getCommand());
+        StateUtil.saveGame(WorldMap.getWorldMap(), CommandUtil.getLastLev().getCommand());
         return levelProcess("menu");
     }
     public GameLevel loadProcess(){
-        String com = GameState.loadGame(SetEnv.get("SAVE_PATH"));
+        String com = StateUtil.loadGame(SetEnv.get("GAME_STATE_PATH"));
         return levelProcess(com);
     }
     public GameLevel gameOverProcess(){
@@ -74,6 +76,7 @@ public class CommandProcessor {
             case "save game" -> {return saveProcess();}
             case "load game" -> {return loadProcess();}
             case "game over" -> {return gameOverProcess();}
+            case "resume game" -> {return levelProcess(prevLevel.getCommand());}
             default -> {return levelProcess(com);}
         }
     }
@@ -91,9 +94,8 @@ public class CommandProcessor {
         }
     }
 
-
-
     public static void systemExitRoutine() {
+        WorldUtil.writeOutWorldMap(SetEnv.get("WORLD_SAVE_PATH"));
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("\n[SAVER] System exit triggered.");
         }, "Game-Exit-Hook"));
@@ -101,11 +103,11 @@ public class CommandProcessor {
     }
 
     public static void gameOverRoutine() {
+        WorldUtil.writeOutWorldMap(SetEnv.get("WORLD_SAVE_PATH"));
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("\n[SAVER] Game Over triggered.");
             saveGameState(new GameState());
         }, "Game-Save-Hook"));
-
         System.exit(0);
     }
 }

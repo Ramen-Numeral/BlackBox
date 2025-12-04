@@ -4,7 +4,7 @@ package game.api.utilityJSON;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
-import game.startupRoutine.envsetup.SetEnv;
+import game.stateRoutines.envsetup.SetEnv;
 
 public class PostJSON {
 
@@ -30,14 +30,25 @@ public class PostJSON {
         }
     }
 
-    /** Sends a POST request with JSON and returns InputStream for binary response (Polly) */
-    public static InputStream postJSONBinReturn(String endpoint, String json, String authHeader) throws IOException {
-        URLConnection conn = new URL(endpoint).openConnection();
-        conn.setDoOutput(true);
-        conn.setRequestProperty("Content-Type", "application/json");
-        conn.setRequestProperty("Authorization", authHeader);
 
-        try (OutputStream out = conn.getOutputStream()) { out.write(json.getBytes("UTF-8")); }
-        return conn.getInputStream();
+    public static InputStream postPolly(String text) {
+        PollyClient polly = PollyClient.builder()
+                .region(Region.of(SetEnv.get("AWS_REGION")))
+                .credentialsProvider(StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create(
+                                SetEnv.get("AWS_ACCESS_KEY"),
+                                SetEnv.get("AWS_SECRET_ACCESS_KEY")
+                        )
+                ))
+                .build();
+
+        SynthesizeSpeechRequest request = SynthesizeSpeechRequest.builder()
+                .text(text)
+                .voiceId(SetEnv.get("POLLY_VOICE"))
+                .outputFormat(OutputFormat.MP3)
+                .build();
+
+        SynthesizeSpeechResponse response = polly.synthesizeSpeech(request);
+        return response.audioStream();
     }
 }

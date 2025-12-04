@@ -1,4 +1,4 @@
-package game.gameObjects;
+package game.gameUtil.objs;
 
 import java.io.Serializable;
 import java.util.HashMap;

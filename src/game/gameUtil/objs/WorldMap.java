@@ -1,6 +1,7 @@
-package game.gameObjects;
+package game.gameUtil.objs;
 
 import game.commandUtil.CommandUtil;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -60,7 +61,7 @@ public final class WorldMap {
     public static boolean contains(String com){ return worldMap.containsKey(com); }
     public static Set<String> getLevelCommands() { return Collections.unmodifiableSet(worldMap.keySet()); }
     public static Collection<GameLevel> getAllLevels() { return Collections.unmodifiableCollection(worldMap.values()); }
-    public boolean isEmpty() { return worldMap.isEmpty(); }
+    public static boolean isEmpty() { return worldMap.isEmpty(); }
 
     public static Set<String> getEmbeddedCommands() { return Collections.unmodifiableSet(commandEmbeddings.keySet()); }
     public static double[] getCommandEmbedding(String command) {

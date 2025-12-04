@@ -1,4 +1,7 @@
-package game.gameObjects;
+package game.gameUtil.helpers;
+
+import game.gameUtil.objs.GameLevel;
+import game.gameUtil.objs.WorldMap;
 
 import java.io.*;
 import java.util.HashMap;
@@ -59,7 +62,6 @@ public final class WorldUtil {
             System.err.println("[WORLD-LOADER] ERROR: Failed to read WorldMap from file: " + saveFilePath);
             e.printStackTrace();
         }
-
         return false;
     }
 }

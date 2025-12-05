@@ -1,5 +1,6 @@
 package game;
 
+import game.audioUtil.audioOut.AudioOutput;
 import game.commandUtil.CommandUtil;
 import game.gameUtil.objs.WorldMap;
 import game.stateRoutines.StartupRoutine;
@@ -27,8 +28,9 @@ public class Main {
         // Flag to interrupt audio playback if a new command comes in
         AtomicBoolean stopFlag = new AtomicBoolean(false);
 
-        //seed queue with the start up spiel
-        audioQueue.offer("start game");
+        //initial startup of game
+        AudioOutput.playByteArray(WorldMap.getLevel("start game").getNarrationAudio());
+        AudioOutput.playByteArray(WorldMap.getLevel("start game").getCommandPromptAudio());
 
         // Start Listener thread
         ListenerTask listener = new ListenerTask(commandQueue);
@@ -55,7 +57,6 @@ public class Main {
             }
         }, "CommandThread");
         commandThread.start();
-
         // Start Audio Output thread
         Thread audioThread = new Thread(() -> {
             while (!Thread.currentThread().isInterrupted()) {
@@ -70,6 +71,8 @@ public class Main {
         }, "AudioThread");
         audioThread.start();
     }
+
+
 }
 
 /*

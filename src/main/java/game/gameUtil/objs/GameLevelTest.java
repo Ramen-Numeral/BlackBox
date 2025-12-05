@@ -1,45 +1,69 @@
-package game.gameUtil.objs;
+package game.gameUtil.test;
 
+import game.gameUtil.objs.GameLevel;
+import game.audioUtil.audioOut.AudioOutput;
 import game.stateRoutines.envsetup.SetEnv;
 
-import java.io.IOException;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import java.io.ByteArrayInputStream;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GameLevelTest {
 
     public static void main(String[] args) {
-        SetEnv.load(".env");
-        System.out.println("=== GameLevel Test ===");
-/*
-        if (args.length == 0) {
-            System.err.println("Usage: GameLevelTest <path-to-level.txt>");
-            return;
-        }*/
-
-        String txtPath = "level_texts/level_template";
-        System.out.println("Loading level file: " + txtPath);
-
-
         try {
-            GameLevel level = new GameLevel(txtPath);
+            // Load environment variables
+            SetEnv.load(".env");
 
-            System.out.println("\n--- GameLevel Constructed Successfully ---");
-            System.out.println(level); // uses your toString()
+            // Example level file path (adjust to your actual file)
+            String levelPath = "level_texts/start.txt";
 
-            System.out.println("\n--- Detailed Field Check ---");
-            System.out.println("Command: " + level.getCommand());
-            System.out.println("Available Commands: " + level.getAvailableCommands());
-            System.out.println("Embedding length: " + (level.getEmbedding() != null ? level.getEmbedding().length : 0));
-            System.out.println("Prompt audio bytes: " + (level.getCommandPromptAudio() != null ? level.getCommandPromptAudio().length : 0));
-            System.out.println("Narration audio bytes: " + (level.getNarrationAudio() != null ? level.getNarrationAudio().length : 0));
+            System.out.println("Loading GameLevel from: " + levelPath);
+            GameLevel level = new GameLevel(levelPath);
 
-        } catch (IOException e) {
-            System.err.println("IO ERROR loading level:");
-            e.printStackTrace();
+            System.out.println("Narration length: " + level.getNarrationAudio().length);
+            System.out.println("Command prompt length: " + level.getCommandPromptAudio().length);
+
+            // Try playByteArray
+            System.out.println("Playing narration...");
+            AudioOutput.playByteArray(level.getNarrationAudio());
+            System.out.println("Playing command prompt...");
+            AudioOutput.playByteArray(level.getCommandPromptAudio());
+
+            // Try playStream
+            System.out.println("Playing narration via stream...");
+            ByteArrayInputStream bais = new ByteArrayInputStream(level.getNarrationAudio());
+            AudioFormat format = new AudioFormat(16000, 16, 1, true, false);
+            AudioInputStream ais = new AudioInputStream(bais, format, level.getNarrationAudio().length / format.getFrameSize());
+            AudioOutput.playStream(ais);
+
         } catch (Exception e) {
-            System.err.println("Unexpected ERROR during GameLevel creation:");
             e.printStackTrace();
         }
+    }
 
-        System.out.println("\n=== Test Complete ===");
+    // Wrapper for narration
+    private static void playNarration(GameLevel level, AtomicBoolean stopFlag) throws Exception {
+        byte[] narration = level.getNarrationAudio();
+        if (narration != null && narration.length > 0) {
+            AudioOutput.playByteArrayInterruptible(narration, stopFlag);
+        } else {
+            System.out.println("No narration audio found for this level.");
+        }
+    }
+
+    // Wrapper for prompt choices
+    private static void playPromptChoices(GameLevel level, AtomicBoolean stopFlag) throws Exception {
+        for (String command : level.getAvailableCommands()) {
+            GameLevel choice = game.gameUtil.objs.WorldMap.getLevel(command);
+            if (choice != null && !choice.isPlayed()) {
+                if (stopFlag.get()) return; // allow interruption
+                byte[] audio = choice.getCommandPromptAudio();
+                if (audio != null && audio.length > 0) {
+                    AudioOutput.playByteArrayInterruptible(audio, stopFlag);
+                }
+            }
+        }
     }
 }

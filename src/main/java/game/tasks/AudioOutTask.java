@@ -28,16 +28,23 @@ public class AudioOutTask implements Runnable {
     @Override
     public void run() {
         try {
-            String levKey = audioInterruptQueue.take();
-            GameLevel level = WorldMap.getLevel(levKey);
+            GameLevel level = WorldMap.getLevel(audioInterruptQueue.take());
             System.out.println("[OUTPUT THREAD] Starting playback for level: " + level.getCommand());
-            if (level == null) {
-                System.err.println("[OUTPUT THREAD] No level found for key: " + levKey);
-                return;
-            }
-            // Play narration in chunks so we can check for interruption
-            LevelUtil.playNarrationAudio(level, stopFlag);
 
+            // Play narration in chunks so we can check for interruption
+            LevelUtil.playNarrationAudio(level);
+            //TODO add a file that introduces the prompt choices
+            LevelUtil.playPromptChoices(level);
+        } catch (Exception e) {
+            System.err.println("[OUTPUT THREAD] Audio playback error: " + e.getMessage());
+        } finally {
+            System.out.println("[OUTPUT THREAD] Playback finished.");
+        }
+    }
+}
+
+
+/*
             if (stopFlag.get()) {
                 System.out.println("[OUTPUT THREAD] Playback interrupted before prompt choices.");
                 return;
@@ -49,10 +56,5 @@ public class AudioOutTask implements Runnable {
                 System.out.println("[OUTPUT THREAD] Playback interrupted during prompt choices.");
             }
 
-        } catch (Exception e) {
-            System.err.println("[OUTPUT THREAD] Audio playback error: " + e.getMessage());
-        } finally {
-            System.out.println("[OUTPUT THREAD] Playback finished.");
-        }
-    }
-}
+ */
+

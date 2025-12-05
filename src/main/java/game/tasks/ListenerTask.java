@@ -9,7 +9,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class ListenerTask implements Runnable {
 
-    private static final double THRESHOLD_DB = -6;   // min volume to trigger speech
+    private static final double THRESHOLD_DB = -8;   // min volume to trigger speech
     private static final int MAX_PRE_BUFFER = 5;      // number of recent chunks to keep before speech
     private final BlockingQueue<CompletableFuture<String>> commandQueue;
     private final Deque<byte[]> preBuffer = new ArrayDeque<>();

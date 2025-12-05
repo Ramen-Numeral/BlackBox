@@ -26,10 +26,27 @@ public final class GameLevel implements Serializable {
         this.availableCommands = LevelUtil.createAvailableCommand(vals);
         this.command = vals.get("command");
         this.txtPath = txtPath;
-        this.narrationAudio = APICalls.callPolly(vals.get("speech text"));
-        this.commandPromptAudio = APICalls.callPolly(vals.get("command"));
+
+        // Get Polly audio
+        byte[] rawNarration = APICalls.callPolly(vals.get("speech text"));
+        byte[] rawCommandPrompt = APICalls.callPolly(vals.get("command"));
+
+        // Pad with 1 second silence front and back
+        this.narrationAudio = addSilencePadding(rawNarration, 16000, 2, 1); // sampleRate=16kHz, bytesPerSample=2, seconds=1
+        this.commandPromptAudio = addSilencePadding(rawCommandPrompt, 16000, 2, 1);
+
         this.embedding = APICalls.callEmbeddings(this.command);
         this.played = false;
+    }
+
+    /** Add silence at beginning and end */
+    private byte[] addSilencePadding(byte[] audio, int sampleRate, int bytesPerSample, int seconds) {
+        int silenceLength = sampleRate * bytesPerSample * seconds; // mono channel
+        byte[] padded = new byte[audio.length + silenceLength * 2]; // front + back
+        // front silence already zeroed
+        System.arraycopy(audio, 0, padded, silenceLength, audio.length);
+        // back silence automatically zeroed
+        return padded;
     }
 
     // --- Getters ---

@@ -29,7 +29,7 @@ public class LevelUtil {
 
     public static void playNarrationAudio(GameLevel level, AtomicBoolean stopFlag) throws Exception {
         byte[] narration = level.getNarrationAudio();
-        AudioOutput.playByteArrayInterruptible(narration, stopFlag);
+        AudioOutput.playByteArray(narration);
     }
 
     /** Interruptible prompt choices playback */
@@ -77,7 +77,6 @@ public class LevelUtil {
             String[] commands = options.trim().split("\\$");
             coms.addAll(Arrays.asList(commands));
         }
-        coms.addAll(CommandUtil.getGlobalCommands());
         return coms;
     }
 

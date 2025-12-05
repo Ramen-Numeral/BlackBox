@@ -19,7 +19,9 @@ public class AudioInputEvent {
     public AudioInputEvent(byte[] input) {
         this.input = input;
         this.transcript = APICalls.callWhisper(SetEnv.get("USER_INPUT_FILE"));
-        this.embedding = APICalls.callEmbeddings(transcript);
+        String normal = transcript.toLowerCase().replaceAll("[^a-z ]", "");
+
+        this.embedding = APICalls.callEmbeddings(normal);
     }
     public AudioInputEvent() {
         this.input = null;

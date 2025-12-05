@@ -1,0 +1,3 @@
+command : forest
+speech text : You enter a dark forest. The trees tower above you.
+available commands : river$lookup$cave

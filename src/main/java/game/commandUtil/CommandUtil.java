@@ -15,18 +15,20 @@ public class CommandUtil {
 
     private static GameLevel prevLevel = WorldMap.getLevel("start");
     private static final ArrayList<String> globalCommands = new ArrayList<String>();
-    public List<String> getGlobalCommands() {
+    public static List<String> getGlobalCommands() {
         return Collections.unmodifiableList(globalCommands);
     }
-    public boolean isGlobalCommand(String com) {
+
+    public static boolean isGlobalCommand(String com) {
         return globalCommands.contains(com);
     }
     public static GameLevel getLastLev() {
         return prevLevel;
     }
 
+    //done during the creation of the world map
     public static void initGlobalCommands(){
-        globalCommands.add("save and exit");
+        globalCommands.add("save");
         globalCommands.add("error");
         globalCommands.add("save game");
         globalCommands.add("start game");
@@ -34,45 +36,46 @@ public class CommandUtil {
         globalCommands.add("repeat choices");
         globalCommands.add("tutorial");
         globalCommands.add("new game");
+        globalCommands.add("game intro");
+        globalCommands.add("exit");
     }
 
 
-    public GameLevel exitProcess(){
+    public static String exitProcess(){
         systemExitRoutine();
         return levelProcess("exit"); //never returns hard jvm exit
     }
-    public GameLevel saveProcess(){
+    public static String saveProcess(){
         WorldUtil.writeOutWorldMap();
         StateUtil.saveGame(WorldMap.getWorldMap(), CommandUtil.getLastLev().getCommand());
         return levelProcess("menu");
     }
-    public GameLevel loadProcess(){
+    public static String loadProcess(){
         String com = StateUtil.loadGame(SetEnv.get("GAME_STATE_PATH"));
         return levelProcess(com);
     }
-    public GameLevel gameOverProcess(){
+    public static String gameOverProcess(){
         gameOverRoutine();
         return levelProcess("exit"); //hard system exit
     }
 
 
-    public GameLevel levelProcess(String com){
-        if(!WorldMap.contains(com)) return(WorldMap.getLevel("error"));
-        GameLevel toPlay = WorldMap.getLevel(com);
-        if(isGlobalCommand(com)) {
+    public static String levelProcess(String com){
+        if(!WorldMap.contains(com)) return("error");
+        if(!isGlobalCommand(com)) {
             WorldMap.getLevel(com).setPlayed(true); //dont make commands that are always available unavail
         }
-        prevLevel = toPlay;
-        return WorldMap.getLevel(com);
+        prevLevel = WorldMap.getLevel(com);
+        return com;
     }
 
-    public GameLevel runCommand(String com){
+    public static String runCommand(String com){
         switch (com){
             case "exit" -> {return exitProcess();}
             case "save game" -> {return saveProcess();}
             case "load game" -> {return loadProcess();}
             case "game over" -> {return gameOverProcess();}
-            case "resume game" -> {return levelProcess(prevLevel.getCommand());}
+            case "resume game" -> {return prevLevel.getCommand();}
             default -> {return levelProcess(com);}
         }
     }

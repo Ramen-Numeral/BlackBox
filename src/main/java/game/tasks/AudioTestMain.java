@@ -1,42 +1,37 @@
-/*package game.tasks;
+package game.tasks;
 
+import game.gameUtil.objs.WorldMap;
 import game.stateRoutines.envsetup.SetEnv;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.*;
 
 public class AudioTestMain {
-
-    public static void main(String[] args) {
-        // Load environment variables (must define USER_INPUT_FILE)
+    public static void main(String[] args) throws Exception {
         SetEnv.load(".env");
+        WorldMap.buildLevelMap();
+        // Queue for receiving futures from listener
+        BlockingQueue<CompletableFuture<String>> commandQueue = new LinkedBlockingQueue<>();
 
-        // Create a simple queue for commands (not used in this test)
-        BlockingQueue<String> commandQueue = new ArrayBlockingQueue<>(10);
-
-        // Start the MasterAudioTask in a separate thread
-        MasterAudioTask audioTask = new MasterAudioTask(commandQueue);
-        Thread listenerThread = new Thread(audioTask);
+        // Create and start listener thread
+        ListenerTask listener = new ListenerTask(commandQueue);
+        Thread listenerThread = new Thread(listener);
         listenerThread.start();
 
-        System.out.println("Listening for speech. Speak into the microphone...");
+        System.out.println("Listener started. Speak something...");
 
-        // Let it run for a while (e.g., 60 seconds), then stop
-        try {
-            Thread.sleep(60000); // 60 seconds
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        // Take one future from the queue (blocking)
+        CompletableFuture<String> future = commandQueue.take();
 
-        // Stop the thread gracefully
+        System.out.println("Recording in progress...");
+
+        // Wait for recorder to finish
+        String result = future.get(); // blocks until recording + command matching completes
+
+        System.out.println("Recognized command: " + result);
+
+        // Clean up: stop listener
         listenerThread.interrupt();
-        try {
-            listenerThread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        System.out.println("Test finished.");
+        listenerThread.join();
+        System.out.println("Listener stopped.");
     }
 }
-*/

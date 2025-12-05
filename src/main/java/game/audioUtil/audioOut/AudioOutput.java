@@ -7,6 +7,7 @@ import javax.sound.sampled.*;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AudioOutput {
 
@@ -79,7 +80,17 @@ public class AudioOutput {
         }
     }
 
-
+    /** Helper: play byte array in chunks and check stopFlag between chunks */
+    public static void playByteArrayInterruptible(byte[] audio, AtomicBoolean stopFlag) throws Exception {
+        int chunkSize = 1024; // bytes per chunk
+        for (int pos = 0; pos < audio.length; pos += chunkSize) {
+            if (stopFlag.get()) return; // stop immediately
+            int len = Math.min(chunkSize, audio.length - pos);
+            byte[] chunk = new byte[len];
+            System.arraycopy(audio, pos, chunk, 0, len);
+            AudioOutput.playByteArray(chunk); // blocking playback of chunk
+        }
+    }
 
 
     public static void main(String[] args) {

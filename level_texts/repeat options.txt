@@ -1,0 +1,3 @@
+command : repeat choices
+speech text : Here are your available choices again.
+available commands :

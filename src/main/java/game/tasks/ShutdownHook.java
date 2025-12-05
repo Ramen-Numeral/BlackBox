@@ -1,4 +1,4 @@
-/*package game.tasks;
+package game.tasks;
 
 import game.commandUtil.CommandUtil;
 import game.gameUtil.helpers.StateUtil;
@@ -30,4 +30,3 @@ public class ShutdownHook {
     }
 }
 
-*/

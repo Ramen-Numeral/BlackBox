@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 public final class GameState implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
     public Map<String, Boolean> playedStatus;
     public String currentLevelCommand;
 

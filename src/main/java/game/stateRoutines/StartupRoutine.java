@@ -4,17 +4,19 @@ import game.gameUtil.helpers.WorldUtil;
 import game.gameUtil.objs.WorldMap;
 import game.stateRoutines.envsetup.SetEnv;
 
+import java.io.File;
+
 public class StartupRoutine {
     public static void startupRoutine(){
         SetEnv.load(".env");
-        if(!WorldUtil.loadWorldMap()) {
-            WorldMap.buildLevelMap();
-        }
-        if(WorldMap.isEmpty()){ //safety in case its not available
-            WorldMap.buildLevelMap();
+
+
+        WorldMap.buildLevelMap();
+
+
+        if(WorldMap.isEmpty()){ // only rebuild if absolutely necessary
+            System.out.println("[WORLD-LOADER] WorldMap still empty, ERROR.");
+            }
         }
     }
-
-}
-
 

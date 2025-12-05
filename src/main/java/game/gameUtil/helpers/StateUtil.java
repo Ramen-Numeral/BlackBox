@@ -82,7 +82,6 @@ public final class StateUtil {
         return savedGame.currentLevelCommand;
     }
 
-    // Convenience method: save game using default path
     public static GameState saveGame(Map<String, GameLevel> currentWorldMap, String currentCommand) {
         GameState state = new GameState(WorldMap.getWorldMap(), currentCommand);
         writeOutState(state);

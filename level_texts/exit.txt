@@ -1,0 +1,3 @@
+command : exit
+speech text : Exiting the game. See you next time.
+available commands :

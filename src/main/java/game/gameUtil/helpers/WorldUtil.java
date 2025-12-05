@@ -34,12 +34,19 @@ public final class WorldUtil {
     @SuppressWarnings("unchecked")
     public static boolean loadWorldMap() {
         String saveFilePath = SetEnv.get("WORLD_SAVE_PATH");
+
         if (saveFilePath == null || saveFilePath.isEmpty()) {
             System.err.println("[WORLD-LOADER] ERROR: Save file path is null or empty.");
             return false;
         }
 
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(saveFilePath))) {
+        File saveFile = new File(saveFilePath);
+        if (!saveFile.exists()) {
+            System.err.println("[WORLD-LOADER] ERROR: Save file does not exist: " + saveFilePath);
+            return false; // return early, no attempt to read
+        }
+
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(saveFile))) {
             Object objWorld = ois.readObject();
             Object objEmbeddings = ois.readObject();
 
@@ -66,6 +73,8 @@ public final class WorldUtil {
             System.err.println("[WORLD-LOADER] ERROR: Failed to read WorldMap from file: " + saveFilePath);
             e.printStackTrace();
         }
+
         return false;
     }
+
 }

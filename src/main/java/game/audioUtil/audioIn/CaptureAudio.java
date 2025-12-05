@@ -1,8 +1,7 @@
 package game.audioUtil.audioIn;
 
-import game.audioUtil.audioOut.AudioOutput;
 import game.stateRoutines.envsetup.SetEnv;
-
+import game.audioUtil.audioOut.*;
 import javax.sound.sampled.*;
 import java.io.*;
 import java.util.stream.IntStream;
@@ -12,9 +11,9 @@ public class CaptureAudio {
     private static final float SAMPLE_RATE = 16000.0f;
     private static final int SAMPLE_SIZE = 16;
     private static final int BUFFER_SIZE = 1024;
-    private static final int SILENCE_THRESHOLD = 5000; // amplitude
-    private static final int SILENCE_LIMIT = 3;        // consecutive silent buffers before stopping
+    private static final double SILENCE_THRESHOLD_DB = -5.0; // decibels
     private static final int TIMEOUT_SECONDS = 5;
+    private static final double SILENCE_SECONDS = 3.0; // 4 seconds of silence
 
     /** Capture a small chunk for threshold detection */
     public static byte[] captureAudioChunk() throws LineUnavailableException {
@@ -67,6 +66,7 @@ public class CaptureAudio {
         long startTime = System.currentTimeMillis();
 
         AudioFormat format = line.getFormat();
+        double secondsPerBuffer = (double) BUFFER_SIZE / (format.getFrameSize() * format.getSampleRate());
 
         while (true) {
             int bytesRead = line.read(buffer, 0, buffer.length);
@@ -80,12 +80,14 @@ public class CaptureAudio {
             }
             rms = Math.sqrt(rms / (bytesRead / 2));
 
-            boolean silent = rms < SILENCE_THRESHOLD;
+            // Decibel calculation
+            double db = 20 * Math.log10(rms / 32768.0);
+            boolean silent = db < SILENCE_THRESHOLD_DB;
 
             if (speechDetected) {
-                System.out.println("speech happening");
                 silentCount = silent ? silentCount + 1 : 0;
-                if (silentCount >= SILENCE_LIMIT) break;
+                // Stop if accumulated silence exceeds threshold
+                if (silentCount * secondsPerBuffer >= SILENCE_SECONDS) break;
             } else if (!silent) {
                 speechDetected = true;
             }
@@ -110,7 +112,8 @@ public class CaptureAudio {
         return audioBytes;
     }
 
-    public static void main(String[] args) {
+
+public static void main(String[] args) {
         SetEnv.load(".env");
         System.out.println("Starting microphone test. Speak something...");
 

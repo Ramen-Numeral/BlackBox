@@ -1,0 +1,3 @@
+command : new game
+speech text : Beginning a new adventure.
+available commands :

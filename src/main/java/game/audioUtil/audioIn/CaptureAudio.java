@@ -11,7 +11,7 @@ public class CaptureAudio {
     private static final float SAMPLE_RATE = 16000.0f;
     private static final int SAMPLE_SIZE = 16;
     private static final int BUFFER_SIZE = 1024;
-    private static final double SILENCE_THRESHOLD_DB = -8.0; // decibels
+    private static final double SILENCE_THRESHOLD_DB = -2.0; // decibels
     private static final int TIMEOUT_SECONDS = 8;
     private static final double SILENCE_SECONDS = 3.0; // 4 seconds of silence
 
@@ -56,7 +56,6 @@ public class CaptureAudio {
     }
 
 
-
     private static byte[] record() throws IOException, LineUnavailableException {
         try (TargetDataLine line = setupLine()) {
             line.start();
@@ -65,6 +64,7 @@ public class CaptureAudio {
 
             long silenceStart = -1;
             long startTime = System.currentTimeMillis();
+            AudioFormat format = line.getFormat();
 
             while (true) {
                 int bytesRead = line.read(buffer, 0, buffer.length);
@@ -92,12 +92,9 @@ public class CaptureAudio {
             }
 
             line.stop();
-            return out.toByteArray();
-        }
-    }
+            byte[] audioBytes = out.toByteArray();
 
-            // Optional: write to .wav for testing
-            /*
+            // Write to .wav for testing
             String outputPath = SetEnv.get("USER_INPUT_FILE");
             try (ByteArrayInputStream bais = new ByteArrayInputStream(audioBytes)) {
                 AudioInputStream ais = new AudioInputStream(bais, format, audioBytes.length / format.getFrameSize());
@@ -106,8 +103,10 @@ public class CaptureAudio {
             } catch (Exception e) {
                 throw new IOException("Failed to write WAV file: " + e.getMessage(), e);
             }
-            */
 
+            return audioBytes;
+        }
+    }
 
 
 

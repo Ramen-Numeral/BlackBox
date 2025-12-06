@@ -12,7 +12,7 @@ public class ListenerTask implements Runnable {
 
     private static final double THRESHOLD_DB = -7;
     private static final int REQUIRED_CHUNKS = 2;          // number of chunks to trigger
-    private static final long SAMPLE_INTERVAL_MS = 100;
+    private static final long SAMPLE_INTERVAL_MS = 10;
     private static final long MAX_PAUSE_MS = 2000;         // max pause allowed between chunks
     private static final int MAX_PRE_BUFFER = REQUIRED_CHUNKS + 40;
 

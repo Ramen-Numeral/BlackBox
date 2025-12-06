@@ -10,7 +10,7 @@ import java.util.Deque;
 import java.util.concurrent.CompletableFuture;
 
 public class RecorderTask implements Runnable {
-    private final Deque <byte[]> buff;
+    private Deque <byte[]> buff;
     private final CompletableFuture<String>nxtCommand;
 
     public RecorderTask(CompletableFuture<String> nxtCommand, Deque<byte[]> preBuff){
@@ -23,8 +23,10 @@ public class RecorderTask implements Runnable {
             byte[] userRecording = CaptureAudio.captureUserAudio();
             buff.add(userRecording);
             AudioInputEvent userAud = new AudioInputEvent(combineChunks(buff));
+
             String nxt = userAud.matchCommand();
             nxtCommand.complete(nxt);
+            //match Command will return error. if audio input event returns an error, then command task should not poll it
         } catch (LineUnavailableException | IOException e) {
             nxtCommand.completeExceptionally(e);
             throw new RuntimeException(e);

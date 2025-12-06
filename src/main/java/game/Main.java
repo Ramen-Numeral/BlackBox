@@ -62,7 +62,7 @@ public class Main {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
                     String audioKey = audioQueue.take(); // wait for new audio command
-                    AudioOutTask audioTask = new AudioOutTask(stopFlag, audioQueue);
+                    AudioOutTask audioTask = new AudioOutTask(audioQueue);
                     audioTask.run(); // blocking playback
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();

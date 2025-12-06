@@ -8,7 +8,7 @@ import java.util.concurrent.*;
 public class AudioTestMain {
     public static void main(String[] args) throws Exception {
         SetEnv.load(".env");
-        WorldMap.buildLevelMap();
+    //    WorldMap.buildLevelMap();
         // Queue for receiving futures from listener
         BlockingQueue<CompletableFuture<String>> commandQueue = new LinkedBlockingQueue<>();
 

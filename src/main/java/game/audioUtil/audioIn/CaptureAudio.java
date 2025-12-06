@@ -11,9 +11,10 @@ public class CaptureAudio {
     private static final float SAMPLE_RATE = 16000.0f;
     private static final int SAMPLE_SIZE = 16;
     private static final int BUFFER_SIZE = 1024;
-    private static final double SILENCE_THRESHOLD_DB = -5.0; // decibels
-    private static final int TIMEOUT_SECONDS = 5;
+    private static final double SILENCE_THRESHOLD_DB = -8.0; // decibels
+    private static final int TIMEOUT_SECONDS = 8;
     private static final double SILENCE_SECONDS = 3.0; // 4 seconds of silence
+
 
     /** Capture a small chunk for threshold detection */
     public static byte[] captureAudioChunk() throws LineUnavailableException {
@@ -27,10 +28,8 @@ public class CaptureAudio {
     }
 
     /** Capture full user audio until silence or timeout */
-    public static byte[] captureUserAudio() throws LineUnavailableException, IOException {
-        try (TargetDataLine line = setupLine()) {
-            return record(line);
-        }
+    public synchronized static byte[] captureUserAudio() throws LineUnavailableException, IOException {
+            return record();
     }
 
     /** Calculate decibel level of a buffer */
@@ -56,64 +55,65 @@ public class CaptureAudio {
         return line;
     }
 
-    /** Record until silence or timeout */
-    private static byte[] record(TargetDataLine line) throws IOException {
-        line.start();
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        byte[] buffer = new byte[BUFFER_SIZE];
-        int silentCount = 0;
-        boolean speechDetected = false;
-        long startTime = System.currentTimeMillis();
 
-        AudioFormat format = line.getFormat();
-        double secondsPerBuffer = (double) BUFFER_SIZE / (format.getFrameSize() * format.getSampleRate());
 
-        while (true) {
-            int bytesRead = line.read(buffer, 0, buffer.length);
-            if (bytesRead > 0) out.write(buffer, 0, bytesRead);
 
-            // RMS for this buffer
-            double rms = 0;
-            for (int i = 0; i < bytesRead / 2; i++) {
-                int sample = (buffer[2 * i + 1] << 8) | (buffer[2 * i] & 0xFF);
-                rms += sample * sample;
+    private static byte[] record() throws IOException, LineUnavailableException {
+        try (TargetDataLine line = setupLine()) {
+            line.start();
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            byte[] buffer = new byte[BUFFER_SIZE];
+
+            long silenceStart = -1;
+            long startTime = System.currentTimeMillis();
+
+            while (true) {
+                int bytesRead = line.read(buffer, 0, buffer.length);
+                if (bytesRead <= 0) continue;
+
+                out.write(buffer, 0, bytesRead);
+
+                // Calculate decibels for actual bytes read
+                byte[] chunkCopy = new byte[bytesRead];
+                System.arraycopy(buffer, 0, chunkCopy, 0, bytesRead);
+                double db = calculateDecibels(chunkCopy);
+
+                boolean silent = db < SILENCE_THRESHOLD_DB;
+
+                if (!silent) {
+                    silenceStart = -1; // reset silence timer if sound detected
+                } else {
+                    if (silenceStart < 0) silenceStart = System.currentTimeMillis();
+                    long silentDuration = System.currentTimeMillis() - silenceStart;
+                    if (silentDuration >= SILENCE_SECONDS * 1000 && out.size() > 0) break;
+                }
+
+                // Timeout safety
+                if (System.currentTimeMillis() - startTime >= TIMEOUT_SECONDS * 1000) break;
             }
-            rms = Math.sqrt(rms / (bytesRead / 2));
 
-            // Decibel calculation
-            double db = 20 * Math.log10(rms / 32768.0);
-            boolean silent = db < SILENCE_THRESHOLD_DB;
-
-            if (speechDetected) {
-                silentCount = silent ? silentCount + 1 : 0;
-                // Stop if accumulated silence exceeds threshold
-                if (silentCount * secondsPerBuffer >= SILENCE_SECONDS) break;
-            } else if (!silent) {
-                speechDetected = true;
-            }
-
-            // Safety timeout
-            if ((System.currentTimeMillis() - startTime) / 1000 >= TIMEOUT_SECONDS) break;
+            line.stop();
+            return out.toByteArray();
         }
-
-        line.stop();
-        byte[] audioBytes = out.toByteArray();
-
-        // Write to .wav file
-        String outputPath = SetEnv.get("USER_INPUT_FILE");
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(audioBytes)) {
-            AudioInputStream ais = new AudioInputStream(bais, format, audioBytes.length / format.getFrameSize());
-            File wavFile = new File(outputPath);
-            AudioSystem.write(ais, AudioFileFormat.Type.WAVE, wavFile);
-        } catch (Exception e) {
-            throw new IOException("Failed to write WAV file: " + e.getMessage(), e);
-        }
-
-        return audioBytes;
     }
 
+            // Optional: write to .wav for testing
+            /*
+            String outputPath = SetEnv.get("USER_INPUT_FILE");
+            try (ByteArrayInputStream bais = new ByteArrayInputStream(audioBytes)) {
+                AudioInputStream ais = new AudioInputStream(bais, format, audioBytes.length / format.getFrameSize());
+                File wavFile = new File(outputPath);
+                AudioSystem.write(ais, AudioFileFormat.Type.WAVE, wavFile);
+            } catch (Exception e) {
+                throw new IOException("Failed to write WAV file: " + e.getMessage(), e);
+            }
+            */
 
-public static void main(String[] args) {
+
+
+
+
+    public static void main(String[] args) {
         SetEnv.load(".env");
         System.out.println("Starting microphone test. Speak something...");
 

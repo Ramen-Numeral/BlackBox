@@ -13,28 +13,24 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class AudioOutTask implements Runnable {
 
-    private final AtomicBoolean stopFlag;
-    private final BlockingQueue<String> audioInterruptQueue;
 
-    /**
-     * @param stopFlag AtomicBoolean used to interrupt playback
-     * @param audioInterruptQueue Queue that receives keys from CommandTask
-     */
-    public AudioOutTask(AtomicBoolean stopFlag, BlockingQueue<String> audioInterruptQueue) {
-        this.stopFlag = stopFlag;
+    private final BlockingQueue<String> audioInterruptQueue;
+    public AudioOutTask(BlockingQueue<String> audioInterruptQueue) {
         this.audioInterruptQueue = audioInterruptQueue;
     }
+
 
     @Override
     public void run() {
         try {
-            GameLevel level = WorldMap.getLevel(audioInterruptQueue.take());
-            System.out.println("[OUTPUT THREAD] Starting playback for level: " + level.getCommand());
+            while(true) {
+                GameLevel level = WorldMap.getLevel((audioInterruptQueue.take()));
+                System.out.println("[OUTPUT THREAD] Starting playback for level: " + level.getCommand());
 
-            // Play narration in chunks so we can check for interruption
-            LevelUtil.playNarrationAudio(level);
-            //TODO add a file that introduces the prompt choices
-            LevelUtil.playPromptChoices(level);
+                // Play narration in chunks so we can check for interruption
+                LevelUtil.playNarrationAudio(level);
+                LevelUtil.playPromptChoices(level);
+            }
         } catch (Exception e) {
             System.err.println("[OUTPUT THREAD] Audio playback error: " + e.getMessage());
         } finally {

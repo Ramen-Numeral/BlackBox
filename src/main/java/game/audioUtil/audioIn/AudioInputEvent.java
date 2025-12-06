@@ -66,8 +66,8 @@ public class AudioInputEvent {
                 .filter(entry -> VectorComparison.cosineSimilarity(this.embedding, entry.getValue()) >= MIN_MATCH_THRESHOLD)
                 .map(Map.Entry::getKey)
                 .orElseGet(() -> {
-                    System.out.println("[MATCH] No confident match found. Returning 'repeat choices'.");
-                    return "repeat choices";
+                    System.out.println("[MATCH] No confident match found. Returning 'error'.");
+                    return "error";
                 });
 
         //TODO add a fallback in match command to send the keyset to chat gpt and match a likely match if emb returns null

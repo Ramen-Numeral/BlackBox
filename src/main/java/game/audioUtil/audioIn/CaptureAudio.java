@@ -57,7 +57,6 @@ public class CaptureAudio {
 
 
 
-
     private static byte[] record() throws IOException, LineUnavailableException {
         try (TargetDataLine line = setupLine()) {
             line.start();

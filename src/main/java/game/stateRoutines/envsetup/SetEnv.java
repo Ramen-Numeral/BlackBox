@@ -8,10 +8,14 @@ import java.util.stream.Stream;
 
 public class SetEnv {
 
+
     private static final HashMap<String, String> envMap = new HashMap<>();
 
-    public static HashMap<String, String> load(String path) {
-        try (Stream<String> lines = Files.lines(Paths.get(path))) {
+    public static HashMap<String, String> load() {
+        String[] files = {".env", ".env.secrets"};
+
+        for(String file : files)
+        try (Stream<String> lines = Files.lines(Paths.get(file))) {
             lines.map(String::trim)                          // trim whitespace
                     .filter(line -> !line.isEmpty() && !line.startsWith("#")) // ignore blank/comment lines
                     .forEach(line -> {
@@ -25,6 +29,8 @@ public class SetEnv {
             e.printStackTrace();
             System.out.println("Env file read error");
         }
+
+
         return envMap;
     }
 

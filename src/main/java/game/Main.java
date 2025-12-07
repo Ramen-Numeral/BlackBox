@@ -1,7 +1,4 @@
 package game;
-
-import game.audioUtil.audioOut.AudioOutput;
-import game.gameUtil.objs.WorldMap;
 import game.stateRoutines.StartupRoutine;
 import game.tasks.AudioOutTask;
 import game.tasks.CommandTask;
@@ -16,8 +13,22 @@ import javax.swing.SwingUtilities;
 
 public class Main {
 
+
     public static void main(String[] args) throws Exception {
+
         StartupRoutine.startupRoutine();
+
+        CompletableFuture<Double> dbFuture = new CompletableFuture<>();
+
+        SwingUtilities.invokeLater(() -> {
+            new ThresholdGUI(dbFuture);
+        });
+
+
+        // Main thread waits for user input
+        double threshold = dbFuture.get();
+
+        System.out.println("[MAIN] User chose threshold: " + threshold);
         System.out.println("[MAIN] Starting audio pipeline...");
 
         // Queues for pipeline
@@ -30,12 +41,28 @@ public class Main {
 
         // --- Start GUI on Swing thread ---
         SwingUtilities.invokeLater(() -> {
+            GUI gui = new GUI(guiQueue);
+            guiQueue.offer("loading...");
+        });
+
+        // --- Start AudioOutTask thread ---
+        AudioOutTask audioOutTask = new AudioOutTask(audioQueue, guiQueue);
+        Thread audioThread = new Thread(audioOutTask, "AudioThread");
+        audioThread.start();
+        // --- Startup audio ---
+        audioQueue.put("start game");
+
+        System.out.println("[MAIN] Starting audio pipeline...");
+
+        // Queues for pipeline
+
+        // --- Start GUI on Swing thread ---
+        SwingUtilities.invokeLater(() -> {
             GUI gui = new GUI(guiQueue); // GUI now consumes guiQueue
         });
 
         // --- Startup audio ---
-        AudioOutput.playByteArray(WorldMap.getLevel("start game").getNarrationAudio());
-        AudioOutput.playByteArray(WorldMap.getLevel("start game").getCommandPromptAudio());
+
 
         // --- Start AudioService (fills shared pre-buffer) ---
         AudioServiceTask audioService = new AudioServiceTask(sharedPreBuffer, 50);
@@ -45,7 +72,7 @@ public class Main {
         System.out.println("[MAIN] AudioServiceThread started.");
 
         // --- Start Listener thread ---
-        ListenerTask listener = new ListenerTask(commandQueue, sharedPreBuffer);
+        ListenerTask listener = new ListenerTask(commandQueue, sharedPreBuffer, threshold);
         Thread listenerThread = new Thread(listener, "ListenerThread");
         listenerThread.start();
         System.out.println("[MAIN] ListenerThread started.");
@@ -63,13 +90,5 @@ public class Main {
             }
         });
         System.out.println("[MAIN] CommandThread started.");
-
-        // --- Start AudioOutTask thread ---
-        Thread audioThread = new Thread(() -> {
-            AudioOutTask audioOutTask = new AudioOutTask(audioQueue, guiQueue); // unchanged
-            audioOutTask.run(); // blocking loop inside AudioOutTask
-        }, "AudioThread");
-        audioThread.start();
-        System.out.println("[MAIN] AudioThread started.");
     }
 }

@@ -9,12 +9,7 @@ import com.openai.models.embeddings.CreateEmbeddingResponse;
 import com.openai.models.embeddings.Embedding;
 import com.openai.models.embeddings.EmbeddingCreateParams;
 import game.stateRoutines.envsetup.SetEnv;
-
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 
 public class OpenAIUtil {
@@ -24,7 +19,6 @@ public class OpenAIUtil {
      */
 
     public static OpenAIClient clientUtil(){
-        SetEnv.load(".env");
         String apiKey = SetEnv.get("OPENAI_API_KEY");
 
         OpenAIClient client = OpenAIOkHttpClient.builder()
@@ -35,7 +29,6 @@ public class OpenAIUtil {
 
     public static String transcribeAudio(String string) {
         OpenAIClient client = clientUtil();
-        String outputFile = string;
         File audioFile = new File(string);
 
         try {
@@ -89,20 +82,5 @@ public class OpenAIUtil {
         } catch (Exception e) {
             throw new RuntimeException("Embeddings request failed: " + e.getMessage(), e);
         }
-    }
-
-
-    /**
-     * Cosine similarity helper
-     */
-    public static double cosineSimilarity(List<Double> v1, List<Double> v2) {
-        if (v1.size() != v2.size()) throw new IllegalArgumentException("Vector sizes must match");
-        double dot = 0, normA = 0, normB = 0;
-        for (int i = 0; i < v1.size(); i++) {
-            dot += v1.get(i) * v2.get(i);
-            normA += v1.get(i) * v1.get(i);
-            normB += v2.get(i) * v2.get(i);
-        }
-        return dot / (Math.sqrt(normA) * Math.sqrt(normB));
     }
 }

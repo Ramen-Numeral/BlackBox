@@ -14,7 +14,7 @@ public class GameLevelTest {
     public static void main(String[] args) {
         try {
             // Load environment variables
-            SetEnv.load(".env");
+            SetEnv.load();
 
             // Example level file path (adjust to your actual file)
             String levelPath = "level_texts/start.txt";

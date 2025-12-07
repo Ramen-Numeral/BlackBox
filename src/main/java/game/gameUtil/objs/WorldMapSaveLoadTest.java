@@ -8,7 +8,7 @@ import java.io.File;
 public class WorldMapSaveLoadTest {
 
     public static void main(String[] args) {
-        SetEnv.load(".env");
+        SetEnv.load();
         System.out.println("=== WorldMap Save/Load Test ===");
 
         String saveFile = "worldmap_test_save.dat";

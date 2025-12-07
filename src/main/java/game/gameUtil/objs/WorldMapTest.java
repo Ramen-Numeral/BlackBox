@@ -9,7 +9,7 @@ import java.util.Map;
 public class WorldMapTest {
 
     public static void main(String[] args) {
-        SetEnv.load(".env"); // load any environment variables you need for Polly/Embeddings
+        SetEnv.load(); // load any environment variables you need for Polly/Embeddings
         System.out.println("=== WorldMap Test ===");
 
         String levelDir = "level_texts"; // directory containing .txt level files

@@ -10,7 +10,7 @@ import java.util.concurrent.ExecutionException;
 
 public class ListenerTask implements Runnable {
 
-    private static final double THRESHOLD_DB = -4;
+    private static double THRESHOLD_DB;
     private static final int REQUIRED_CHUNKS = 6;
     private static final long SAMPLE_INTERVAL_MS = 5;
 
@@ -22,9 +22,10 @@ public class ListenerTask implements Runnable {
     private int aboveThresholdCount = 0;
     private long lastAboveThresholdTime = -1;
 
-    public ListenerTask(BlockingQueue<CompletableFuture<String>> commandQueue, Deque<byte[]> sharedPreBuffer) {
+    public ListenerTask(BlockingQueue<CompletableFuture<String>> commandQueue, Deque<byte[]> sharedPreBuffer, double thresh) {
         this.commandQueue = commandQueue;
         this.preBuffer = sharedPreBuffer;
+        THRESHOLD_DB = (thresh);
     }
 
     @Override

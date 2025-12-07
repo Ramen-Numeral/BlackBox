@@ -57,11 +57,9 @@ public class CommandTask implements Callable<Void> {
             System.out.println("[COMMAND THREAD] Processing command: " + command);
             String audioKey = CommandUtil.runCommand(command);
 
-            // Check audioKey validity
-            if (!isInvalidCommand(audioKey)) {
-                lastPlayed = audioKey;
-                audioQueue.offer(audioKey);
-            }
+
+            audioQueue.offer(audioKey);
+
 
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);

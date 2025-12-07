@@ -19,58 +19,47 @@ public class GUI {
 
     private JFrame frame;
     private JTextArea textArea;
-    private BlockingQueue<String> messageQueue = new LinkedBlockingQueue<>();
-
-    private String currentMessage = "";
-    private int charIndex = 0;
+    private final BlockingQueue<String> messageQueue;
 
     private static final int LEFT = 100, RIGHT = 150, TOP = 100, BOTTOM = 200;
     private static final int WINDOW_SIZE = 800;
 
-    public GUI(BlockingQueue<String> guiQueue) {
-        this(); // call the existing no-arg constructor to set up the GUI components
-
-        // Start the TextOutTask for this queue
-        TextOutTask textTask = new TextOutTask(guiQueue, textArea, 80); // 80ms per character
-        new Thread(textTask).start();
-    }
-
-    public GUI() {
+    public GUI(BlockingQueue<String> messageQueue) {
         frame = new JFrame();
         frame.setUndecorated(true);
         frame.setSize(WINDOW_SIZE, WINDOW_SIZE);
-        frame.setLocationRelativeTo(null);
+        frame.setLocationRelativeTo(null); // center
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(true);
+        this.messageQueue = messageQueue;
 
         // ---------------- LAYERED PANE ----------------
         JLayeredPane layered = new JLayeredPane();
         layered.setPreferredSize(new Dimension(WINDOW_SIZE, WINDOW_SIZE));
 
-        // ---------------- BLACK BACKGROUND ----------------
+        // Black background
         JPanel blackBg = new JPanel();
         blackBg.setBackground(Color.BLACK);
         blackBg.setBounds(0, 0, WINDOW_SIZE, WINDOW_SIZE);
         layered.add(blackBg, Integer.valueOf(0));
 
-        // ---------------- CRT TERMINAL ----------------
+        // CRT Terminal panel
         int terminalWidth = WINDOW_SIZE - LEFT - RIGHT;
         int terminalHeight = WINDOW_SIZE - TOP - BOTTOM;
-
         CRTPanel crt = new CRTPanel();
         crt.setLayout(new BorderLayout());
         crt.setBounds(LEFT, TOP, terminalWidth, terminalHeight);
 
-        // ---------------- TEXT AREA ----------------
+        // Text Area
         textArea = new JTextArea();
         textArea.setEditable(false);
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
         textArea.setOpaque(false);
-        textArea.setForeground(new Color(50, 180, 120, 190)); // slightly dimmed green
-        textArea.setMargin(new Insets(30, 30, 30, 30));
+        textArea.setForeground(new Color(50, 180, 120, 190));
+        textArea.setMargin(new Insets(50, 30, 60, 40));
 
-        // Load custom font
+        // Custom font
         try {
             InputStream is = getClass().getResourceAsStream("/pixelmix.ttf");
             Font font = Font.createFont(Font.TRUETYPE_FONT, is).deriveFont(14f);
@@ -88,7 +77,7 @@ public class GUI {
         crt.add(scroll, BorderLayout.CENTER);
         layered.add(crt, Integer.valueOf(1));
 
-        // ---------------- PNG OVERLAY ----------------
+        // PNG overlay
         try {
             InputStream is = getClass().getResourceAsStream("/pixback.png");
             BufferedImage png = ImageIO.read(is);
@@ -106,13 +95,10 @@ public class GUI {
             e.printStackTrace();
         }
 
-        // ---------------- TOP TOOLBAR ----------------
-        JPanel toolbar = new JPanel();
-        toolbar.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
-        toolbar.setBackground(new Color(0, 0, 0, 180));
-        toolbar.setBounds(0, 0, WINDOW_SIZE, 30);
-        toolbar.setVisible(true);
-
+        // Toolbar
+        JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 5));
+        toolbar.setBackground(new Color(0,0,0,180));
+        toolbar.setBounds(0,0,WINDOW_SIZE,30);
         JButton closeBtn = new JButton("X");
         closeBtn.setForeground(Color.WHITE);
         closeBtn.setContentAreaFilled(false);
@@ -121,63 +107,40 @@ public class GUI {
         toolbar.add(closeBtn);
         layered.add(toolbar, Integer.valueOf(3));
 
-        // ---------------- CLOSE ON CLICK OUTSIDE ----------------
+        // Close on outside click
         layered.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (!crt.getBounds().contains(e.getPoint())) {
-                    System.exit(0);
-                }
+                if (!crt.getBounds().contains(e.getPoint())) System.exit(0);
             }
         });
 
         frame.setContentPane(layered);
 
-        // ---------------- CARET ----------------
-        FalloutCaret caret = new FalloutCaret(500);
+        // Blink caret
+        BlinkCaret caret = new BlinkCaret(500);
         textArea.setCaret(caret);
         textArea.setCaretColor(new Color(50, 200, 150));
 
         frame.setVisible(true);
-        // ---------------- START TEXT OUTPUT TASK ----------------
-        TextOutTask textTask = new TextOutTask(messageQueue, textArea, 80); // 80ms per character
-        new Thread(textTask).start();
 
+        // ---------------- TEXT OUTPUT TASK ----------------
+        new Thread(new TextOutTask(messageQueue, textArea, 80)).start();
 
+        // ---------------- LOOP "LOADING..." UNTIL QUEUE HAS MESSAGES ----------------
 
-        // ---------------- DEMO MESSAGES ----------------
-        new Thread(this::simulateIncomingMessages).start();
     }
 
 
-    private void simulateIncomingMessages() {
-        try {
-            Thread.sleep(1200);
-            messageQueue.put("welcom to the quick brown (TM) TERMLINK PROTOCOL");
-            Thread.sleep(1500);
-            messageQueue.put("> INITIALIZING SYSTEM...");
-            Thread.sleep(1800);
-            messageQueue.put("> LOADING AUDIO KERNEL");
-            Thread.sleep(1600);
-            messageQueue.put("> STANDBY...");
-        } catch (Exception ignored) {}
-    }
 
-    public void queueMessage(String msg) {
-        messageQueue.offer(msg);
-    }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(GUI::new);
-    }
-
-    // ================= Fallout-style caret =================
-    static class FalloutCaret extends DefaultCaret {
+    // ================= BlinkCaret =================
+    static class BlinkCaret extends DefaultCaret {
         private boolean visible = true;
-        private int thickness = 6;
-        private Timer blinkTimer;
+        private final int thickness = 6;
+        private final Timer blinkTimer;
 
-        public FalloutCaret(int blinkMs) {
+        public BlinkCaret(int blinkMs) {
             setBlinkRate(0);
             blinkTimer = new Timer(blinkMs, e -> {
                 visible = !visible;
@@ -211,30 +174,24 @@ public class GUI {
         }
     }
 
-    // ================= CRT panel with scanlines & noise =================
+    // ================= CRTPanel =================
     static class CRTPanel extends JPanel {
         private static final int SCANLINE_SPACING = 3;
 
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-            int w = getWidth();
-            int h = getHeight();
-
-            g.setColor(new Color(0, 0, 0));
-            g.fillRect(0, 0, w, h);
-
-            g.setColor(new Color(0, 50, 0, 30));
-            g.fillRect(0, 0, w, h);
-
-            g.setColor(new Color(0, 255, 0, 15));
-            for (int y = 0; y < h; y += SCANLINE_SPACING) g.drawLine(0, y, w, y);
-
-            for (int i = 0; i < w * h / 300; i++) {
-                int x = (int) (Math.random() * w);
-                int y = (int) (Math.random() * h);
-                g.setColor(new Color(100, 100, 100, 20));
-                g.fillRect(x, y, 1, 1);
+            int w = getWidth(), h = getHeight();
+            g.setColor(new Color(0,0,0));
+            g.fillRect(0,0,w,h);
+            g.setColor(new Color(0,50,0,30));
+            g.fillRect(0,0,w,h);
+            g.setColor(new Color(0,255,0,15));
+            for (int y=0;y<h;y+=SCANLINE_SPACING) g.drawLine(0,y,w,y);
+            for (int i=0;i<w*h/300;i++){
+                int x=(int)(Math.random()*w), y=(int)(Math.random()*h);
+                g.setColor(new Color(100,100,100,20));
+                g.fillRect(x,y,1,1);
             }
         }
     }

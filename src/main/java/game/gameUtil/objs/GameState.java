@@ -21,6 +21,7 @@ public final class GameState implements Serializable {
                 .collect(Collectors.toMap(GameLevel::getCommand, level -> true));
     }
 
+
     public GameState() {
         this.currentLevelCommand = "start";
         this.playedStatus = new HashMap<>();

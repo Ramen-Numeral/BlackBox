@@ -26,14 +26,14 @@ public class TextOutTask implements Runnable {
             while (!Thread.currentThread().isInterrupted()) {
                 // Wait for the next message
                 String message = GUITextQueue.take(); // blocks until a message is available
-
+                if(message.equals("loading..."));
+                textArea.setText("");
                 // Append each character with typing effect
                 for (int i = 0; i < message.length(); i++) {
                     final String toAppend = String.valueOf(message.charAt(i));
 
                     SwingUtilities.invokeLater(() -> {
                         textArea.append(toAppend);
-                        // Auto-scroll to newest text
                         textArea.setCaretPosition(textArea.getDocument().getLength());
                     });
 

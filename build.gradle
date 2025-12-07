@@ -7,12 +7,27 @@ repositories {
 }
 
 dependencies {
-    implementation("com.openai:openai-java:4.8.0")
-    implementation 'com.theokanning.openai-gpt3-java:service:0.18.2'
-    implementation 'com.theokanning.openai-gpt3-java:api:0.18.2'
-    implementation 'com.theokanning.openai-gpt3-java:client:0.18.2'
     implementation(platform("software.amazon.awssdk:bom:2.27.21"))
     implementation "software.amazon.awssdk:polly:2.32.10"
     implementation("com.openai:openai-java:4.8.0")
+    implementation 'software.amazon.awssdk:secretsmanager:2.22.26'
+    implementation 'software.amazon.awssdk:regions:2.22.26'
 }
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'game.Main'
+    }
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    // Handle duplicates in META-INF
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    archiveBaseName.set('BlackBox')
+    archiveVersion.set('1.0')
+}
+
 

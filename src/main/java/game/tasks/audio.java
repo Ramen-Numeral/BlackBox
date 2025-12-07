@@ -1,4 +1,4 @@
-package game.tasks.audio;
+/*package game.tasks.audio;
 
 import game.stateRoutines.envsetup.SetEnv;
 import game.tasks.AudioServiceTask;
@@ -13,7 +13,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class audio {
 
     public static void main(String[] args) throws InterruptedException {
-       SetEnv.load(".env");
+       SetEnv.load();
         System.out.println("[MAIN] Starting audio test...");
 
         // Shared pre-buffer between AudioService and Listener
@@ -52,3 +52,6 @@ public class audio {
         // listenerThread.join();
     }
 }
+
+
+ */

@@ -14,7 +14,7 @@ public class CaptureAudio {
     private static final int BUFFER_SIZE = 1024;
     private static final double SILENCE_THRESHOLD_DB = -2.0; // decibels
     private static final int TIMEOUT_SECONDS = 8;
-    private static final double SILENCE_SECONDS = 4.0; // 4 seconds of silence
+    private static final double SILENCE_SECONDS = 2.5; // 4 seconds of silence
 
 
     /** Capture a small chunk for threshold detection */

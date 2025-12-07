@@ -2,7 +2,6 @@ package game.commandUtil;
 import game.gameUtil.helpers.StateUtil;
 import game.gameUtil.helpers.WorldUtil;
 import game.gameUtil.objs.GameLevel;
-import game.gameUtil.objs.GameState;
 import game.gameUtil.objs.WorldMap;
 import game.stateRoutines.envsetup.SetEnv;
 import java.util.ArrayList;
@@ -15,9 +14,6 @@ public class CommandUtil {
 
     private static GameLevel prevLevel = WorldMap.getLevel("start");
     private static final ArrayList<String> globalCommands = new ArrayList<String>();
-    public static List<String> getGlobalCommands() {
-        return Collections.unmodifiableList(globalCommands);
-    }
 
     public static boolean isGlobalCommand(String com) {
         return globalCommands.contains(com);

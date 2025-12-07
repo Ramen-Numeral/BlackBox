@@ -15,7 +15,7 @@ public class PollyPlaybackTest {
     public static void main(String[] args) {
         try {
             // Load environment variables
-            SetEnv.load(".env");
+            SetEnv.load();
 
             // Text to synthesize
             String text = "Hello! This is a test of Polly audio playback using both methods.";

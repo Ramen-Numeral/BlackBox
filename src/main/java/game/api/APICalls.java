@@ -35,7 +35,7 @@ public class APICalls {
 
     public static void main(String[] args) {
         // Load environment variables
-        SetEnv.load(".env");
+        SetEnv.load();
 
         boolean useLocalPolly = false; // Set to false to call AWS Polly live
         byte[] audioBytes;

@@ -18,7 +18,7 @@ public class BuildJSON {
      */
   /*  public static String buildJSON64(byte[] audioBytes) {
         // Check API key exists
-        String apiKey = SetEnv.get("OPENAI_API_KEY");
+        String apiKey = System.getenv("OPENAI_API_KEY");
         String model = SetEnv.getOrSet("WHISPER_MODEL", "whisper-1");
 
         if (apiKey == null || apiKey.isEmpty()) {

@@ -96,7 +96,7 @@ public class AudioOutput {
     public static void main(String[] args) {
         try {
             // Load .env variables
-            SetEnv.load(".env");
+            SetEnv.load();
 
             // Text to convert to speech
             String text = "Hello! This is a test of in-memory playback from Polly.";

@@ -18,6 +18,7 @@ public final class GameLevel implements Serializable {
     private final double[] embedding;
     private final byte[] narrationAudio;
     private final ArrayList<String> availableCommands;
+    private final String narrationTxt;
     private boolean played;
 
     public GameLevel(String txtPath) throws IOException {
@@ -26,6 +27,7 @@ public final class GameLevel implements Serializable {
         this.availableCommands = LevelUtil.createAvailableCommand(vals);
         this.command = vals.get("command");
         this.txtPath = txtPath;
+        this.narrationTxt = vals.get("speech text");
 
         // Get Polly audio
         byte[] rawNarration = APICalls.callPolly(vals.get("speech text"));
@@ -38,6 +40,8 @@ public final class GameLevel implements Serializable {
         this.embedding = APICalls.callEmbeddings(this.command);
         this.played = false;
     }
+
+    public String getNarrationText(){return narrationTxt;}
 
     /** Add silence at beginning and end */
     private byte[] addSilencePadding(byte[] audio, int sampleRate, int bytesPerSample, int seconds) {

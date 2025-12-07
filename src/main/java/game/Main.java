@@ -1,7 +1,6 @@
 package game;
 
 import game.audioUtil.audioOut.AudioOutput;
-import game.commandUtil.CommandUtil;
 import game.gameUtil.objs.WorldMap;
 import game.stateRoutines.StartupRoutine;
 import game.tasks.AudioOutTask;
@@ -13,6 +12,8 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.concurrent.*;
 
+import javax.swing.SwingUtilities;
+
 public class Main {
 
     public static void main(String[] args) throws Exception {
@@ -21,10 +22,16 @@ public class Main {
 
         // Queues for pipeline
         BlockingQueue<CompletableFuture<String>> commandQueue = new ArrayBlockingQueue<>(10);
-        BlockingQueue<String> audioQueue = new ArrayBlockingQueue<>(10);
+        BlockingQueue<String> audioQueue = new ArrayBlockingQueue<>(10); // existing audio pipeline queue
+        BlockingQueue<String> guiQueue = new LinkedBlockingQueue<>(); // new GUI queue for TextOutTask
 
         // Shared pre-buffer for Listener + AudioService
         Deque<byte[]> sharedPreBuffer = new ArrayDeque<>();
+
+        // --- Start GUI on Swing thread ---
+        SwingUtilities.invokeLater(() -> {
+            GUI gui = new GUI(guiQueue); // GUI now consumes guiQueue
+        });
 
         // --- Startup audio ---
         AudioOutput.playByteArray(WorldMap.getLevel("start game").getNarrationAudio());
@@ -48,7 +55,7 @@ public class Main {
         commandExecutor.submit(() -> {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
-                    CommandTask task = new CommandTask(commandQueue, audioQueue);
+                    CommandTask task = new CommandTask(commandQueue, audioQueue); // unchanged
                     task.call(); // blocks until a command is processed
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -59,7 +66,7 @@ public class Main {
 
         // --- Start AudioOutTask thread ---
         Thread audioThread = new Thread(() -> {
-            AudioOutTask audioOutTask = new AudioOutTask(audioQueue);
+            AudioOutTask audioOutTask = new AudioOutTask(audioQueue, guiQueue); // unchanged
             audioOutTask.run(); // blocking loop inside AudioOutTask
         }, "AudioThread");
         audioThread.start();

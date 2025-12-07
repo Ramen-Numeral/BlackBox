@@ -1,5 +1,7 @@
 package game;
 
+import game.tasks.TextOutTask;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.text.*;
@@ -18,11 +20,20 @@ public class GUI {
     private JFrame frame;
     private JTextArea textArea;
     private BlockingQueue<String> messageQueue = new LinkedBlockingQueue<>();
+
     private String currentMessage = "";
     private int charIndex = 0;
 
     private static final int LEFT = 100, RIGHT = 150, TOP = 100, BOTTOM = 200;
     private static final int WINDOW_SIZE = 800;
+
+    public GUI(BlockingQueue<String> guiQueue) {
+        this(); // call the existing no-arg constructor to set up the GUI components
+
+        // Start the TextOutTask for this queue
+        TextOutTask textTask = new TextOutTask(guiQueue, textArea, 80); // 80ms per character
+        new Thread(textTask).start();
+    }
 
     public GUI() {
         frame = new JFrame();
@@ -51,28 +62,18 @@ public class GUI {
         crt.setBounds(LEFT, TOP, terminalWidth, terminalHeight);
 
         // ---------------- TEXT AREA ----------------
-        textArea = new JTextArea() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                // Slight flicker effect
-                Graphics2D g2 = (Graphics2D) g.create();
-                float alpha = 0.7f + (float) (Math.random() * 0.05); // flicker 70%-75%
-                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
-                super.paintComponent(g2);
-                g2.dispose();
-            }
-        };
+        textArea = new JTextArea();
         textArea.setEditable(false);
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
         textArea.setOpaque(false);
-        textArea.setForeground(new Color(50, 180, 120, 250)); // slightly dimmed green
+        textArea.setForeground(new Color(50, 180, 120, 190)); // slightly dimmed green
         textArea.setMargin(new Insets(30, 30, 30, 30));
 
         // Load custom font
         try {
-            InputStream is = getClass().getResourceAsStream("/Computerfont.ttf");
-            Font font = Font.createFont(Font.TRUETYPE_FONT, is).deriveFont(18f);
+            InputStream is = getClass().getResourceAsStream("/pixelmix.ttf");
+            Font font = Font.createFont(Font.TRUETYPE_FONT, is).deriveFont(14f);
             Map<TextAttribute, Object> attrs = (Map<TextAttribute,Object>) font.getAttributes();
             attrs.put(TextAttribute.TRACKING, 0.05);
             textArea.setFont(font.deriveFont(attrs));
@@ -138,33 +139,21 @@ public class GUI {
         textArea.setCaretColor(new Color(50, 200, 150));
 
         frame.setVisible(true);
+        // ---------------- START TEXT OUTPUT TASK ----------------
+        TextOutTask textTask = new TextOutTask(messageQueue, textArea, 80); // 80ms per character
+        new Thread(textTask).start();
 
-        // ---------------- TYPING TIMER ----------------
-        new Timer(80, e -> typeNextChar()).start();
+
 
         // ---------------- DEMO MESSAGES ----------------
         new Thread(this::simulateIncomingMessages).start();
     }
 
-    private void typeNextChar() {
-        if (currentMessage.isEmpty() && !messageQueue.isEmpty()) {
-            currentMessage = messageQueue.poll();
-            charIndex = 0;
-            textArea.append("\n");
-        }
-        if (!currentMessage.isEmpty() && charIndex < currentMessage.length()) {
-            textArea.append(String.valueOf(currentMessage.charAt(charIndex)));
-            charIndex++;
-            textArea.setCaretPosition(textArea.getDocument().getLength());
-        } else if (charIndex >= currentMessage.length()) {
-            currentMessage = "";
-        }
-    }
 
     private void simulateIncomingMessages() {
         try {
             Thread.sleep(1200);
-            messageQueue.put("WELCOME TO ROBCO INDUSTRIES (TM) TERMLINK PROTOCOL");
+            messageQueue.put("welcom to the quick brown (TM) TERMLINK PROTOCOL");
             Thread.sleep(1500);
             messageQueue.put("> INITIALIZING SYSTEM...");
             Thread.sleep(1800);

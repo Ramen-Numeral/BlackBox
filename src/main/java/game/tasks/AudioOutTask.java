@@ -12,10 +12,11 @@ import java.util.concurrent.BlockingQueue;
  */
 public class AudioOutTask implements Runnable {
 
-
+    private final BlockingQueue<String>GUITextQueue;
     private final BlockingQueue<String> audioInterruptQueue;
-    public AudioOutTask(BlockingQueue<String> audioInterruptQueue) {
+    public AudioOutTask(BlockingQueue<String> audioInterruptQueue, BlockingQueue<String>GUITextQueue) {
         this.audioInterruptQueue = audioInterruptQueue;
+        this.GUITextQueue = GUITextQueue;
     }
 
 
@@ -25,6 +26,8 @@ public class AudioOutTask implements Runnable {
             while(true) {
                 GameLevel level = WorldMap.getLevel((audioInterruptQueue.take()));
                 System.out.println("[OUTPUT THREAD] Starting playback for level: " + level.getCommand());
+                String guiTxt = level.getNarrationText();
+                GUITextQueue.offer(guiTxt);
 
                 // Play narration in chunks so we can check for interruption
                 LevelUtil.playNarrationAudio(level);

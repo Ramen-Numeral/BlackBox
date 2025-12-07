@@ -5,91 +5,64 @@ import game.commandUtil.CommandUtil;
 import game.gameUtil.objs.WorldMap;
 import game.stateRoutines.StartupRoutine;
 import game.tasks.AudioOutTask;
+import game.tasks.CommandTask;
 import game.tasks.ListenerTask;
+import game.tasks.AudioServiceTask;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.concurrent.*;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
         StartupRoutine.startupRoutine();
-        System.out.println("Starting audio pipeline...");
+        System.out.println("[MAIN] Starting audio pipeline...");
 
-      //  System.out.println(WorldMap.getWorldMap());
-        // Queue for passing audio commands from recorder -> command processor
+        // Queues for pipeline
         BlockingQueue<CompletableFuture<String>> commandQueue = new ArrayBlockingQueue<>(10);
-
-        // Queue for passing audio keys to audio output
         BlockingQueue<String> audioQueue = new ArrayBlockingQueue<>(10);
 
-        // Flag to interrupt audio playback if a new command comes in
-        AtomicBoolean stopFlag = new AtomicBoolean(false);
+        // Shared pre-buffer for Listener + AudioService
+        Deque<byte[]> sharedPreBuffer = new ArrayDeque<>();
 
-        //initial startup of game
+        // --- Startup audio ---
         AudioOutput.playByteArray(WorldMap.getLevel("start game").getNarrationAudio());
         AudioOutput.playByteArray(WorldMap.getLevel("start game").getCommandPromptAudio());
 
-        // Start Listener thread
-        ListenerTask listener = new ListenerTask(commandQueue);
+        // --- Start AudioService (fills shared pre-buffer) ---
+        AudioServiceTask audioService = new AudioServiceTask(sharedPreBuffer, 50);
+        Thread audioServiceThread = new Thread(audioService, "AudioServiceThread");
+        audioServiceThread.setDaemon(true);
+        audioServiceThread.start();
+        System.out.println("[MAIN] AudioServiceThread started.");
+
+        // --- Start Listener thread ---
+        ListenerTask listener = new ListenerTask(commandQueue, sharedPreBuffer);
         Thread listenerThread = new Thread(listener, "ListenerThread");
         listenerThread.start();
+        System.out.println("[MAIN] ListenerThread started.");
 
-        // Start Command processing thread
-        Thread commandThread = new Thread(() -> {
+        // --- Start CommandTask thread pool ---
+        ExecutorService commandExecutor = Executors.newSingleThreadExecutor(r -> new Thread(r, "CommandThread"));
+        commandExecutor.submit(() -> {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
-                    CompletableFuture<String> future = commandQueue.take(); // wait for recorder
-                    String command = future.get(); // wait until recorder finishes
-
-                    // check for system routines
-                    command = CommandUtil.runCommand(command);
-
-                    // push string to audio output queue
-                    stopFlag.set(true); // interrupt current playback if any
-                    audioQueue.offer(command);
-                    stopFlag.set(false);
+                    CommandTask task = new CommandTask(commandQueue, audioQueue);
+                    task.call(); // blocks until a command is processed
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-        }, "CommandThread");
-        commandThread.start();
-        // Start Audio Output thread
+        });
+        System.out.println("[MAIN] CommandThread started.");
+
+        // --- Start AudioOutTask thread ---
         Thread audioThread = new Thread(() -> {
-            while (!Thread.currentThread().isInterrupted()) {
-                try {
-                    String audioKey = audioQueue.take(); // wait for new audio command
-                    AudioOutTask audioTask = new AudioOutTask(audioQueue);
-                    audioTask.run(); // blocking playback
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
+            AudioOutTask audioOutTask = new AudioOutTask(audioQueue);
+            audioOutTask.run(); // blocking loop inside AudioOutTask
         }, "AudioThread");
         audioThread.start();
+        System.out.println("[MAIN] AudioThread started.");
     }
-
-
 }
-
-/*
-public class Main {
-
-    public static void main(String[] args) {
-
-        StartupRoutine.startupRoutine();
-
-        ExecutorService executor = Executors.newFixedThreadPool(4);        // Listener + command processor
-        ExecutorService audioExecutor = Executors.newSingleThreadExecutor(); // Serial audio playback
-        BlockingQueue<String> commandQueue = new LinkedBlockingQueue<>();
-
-        // Register the global shutdown save routine + executor cleanup
-        ShutdownHook.registerShutdownHook(executor, audioExecutor);
-
-
-
-    }
-}*/

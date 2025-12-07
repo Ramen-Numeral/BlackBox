@@ -3,9 +3,7 @@ package game.tasks;
 import game.commandUtil.CommandUtil;
 import game.gameUtil.helpers.StateUtil;
 import game.gameUtil.helpers.WorldUtil;
-import game.gameUtil.objs.GameState;
 import game.gameUtil.objs.WorldMap;
-import game.stateRoutines.envsetup.SetEnv;
 
 import java.util.concurrent.ExecutorService;
 

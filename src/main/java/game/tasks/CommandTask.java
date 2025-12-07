@@ -9,14 +9,15 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * Callable task for executing commands from recorded audio.
+ * Only forwards "user input error" to the audio queue after 5 consecutive failures.
  */
 public class CommandTask implements Callable<Void> {
 
     private final BlockingQueue<CompletableFuture<String>> commandQueue;
-    private final BlockingQueue<String> audioQueue; // optional: forward key to audio output
+    private final BlockingQueue<String> audioQueue;
     private String lastPlayed = "";
     private static int errorCount = 0;
-    private static int MAX_ERROR_COUNT = 5;
+    private static final int MAX_ERROR_COUNT = 5;
 
     public CommandTask(BlockingQueue<CompletableFuture<String>> commandQueue,
                        BlockingQueue<String> audioQueue) {
@@ -29,47 +30,47 @@ public class CommandTask implements Callable<Void> {
         try {
             // Wait for the next recorded command
             CompletableFuture<String> future = commandQueue.take();
-
             String command = future.get(); // blocks until recording finishes
-            if (!errorCheck(command)) {
-                System.out.println("[COMMAND THREAD] Processing command: " + command);
 
-                // Execute system routines or get key for audio output
-                String audioKey = CommandUtil.runCommand(command);
-                // Forward key to audio output if necessary
-                //don't forward broken commands
-                if (!errorCheck(audioKey)) {
-                    errorCount = 0; //a valid command was found put it in the q
-                    audioQueue.offer(audioKey);
-                    lastPlayed = audioKey;
+            System.out.println("[COMMAND THREAD] Received command: " + command);
+
+            // Check if command is invalid
+            if (isInvalidCommand(command)) {
+                errorCount++;
+                System.out.println("[COMMAND THREAD] Error detected. Current streak: " + errorCount);
+                if (errorCount >= MAX_ERROR_COUNT) {
+                    System.out.println("[COMMAND THREAD] Max error count reached. Sending user input error.");
+                    audioQueue.offer("user input error");
+                    if (lastPlayed != null && !lastPlayed.isEmpty()) {
+                        audioQueue.offer(lastPlayed); // repeat previous valid command
+                    } else {
+                        audioQueue.offer("menu"); // fallback
+                    }
                 }
+                return null; // do not process invalid command
             }
+
+            // Valid command: reset error streak
+            errorCount = 0;
+
+            // Process valid command
+            System.out.println("[COMMAND THREAD] Processing command: " + command);
+            String audioKey = CommandUtil.runCommand(command);
+
+            // Check audioKey validity
+            if (!isInvalidCommand(audioKey)) {
+                lastPlayed = audioKey;
+                audioQueue.offer(audioKey);
+            }
+
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+
         return null;
     }
 
-
-    private boolean errorCheck(String str){
-        if(this.equals("error")||this.equals("")||this.equals(null)){
-            errorCount++;
-            return sendError();
-        } else errorCount--;
-        return false;
-    }
-
-    private boolean sendError(){
-        if (errorCount >= MAX_ERROR_COUNT){//if nothing but garbage has been recorded for 5 consectuive commands, repeat
-            audioQueue.offer("user input error");
-            if(lastPlayed!=null){
-                audioQueue.offer(lastPlayed); //repeat the previous level
-            } else {
-                audioQueue.offer("menu"); //no last level, return to the menu
-            }
-            return true;
-        }
-        return false;
+    private boolean isInvalidCommand(String str) {
+        return str == null || str.isEmpty() || str.equalsIgnoreCase("error");
     }
 }
-

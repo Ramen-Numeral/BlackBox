@@ -5,6 +5,7 @@ import game.audioUtil.audioOut.*;
 import javax.sound.sampled.*;
 import java.io.*;
 import java.util.stream.IntStream;
+import java.util.Deque;
 
 public class CaptureAudio {
 
@@ -13,7 +14,7 @@ public class CaptureAudio {
     private static final int BUFFER_SIZE = 1024;
     private static final double SILENCE_THRESHOLD_DB = -2.0; // decibels
     private static final int TIMEOUT_SECONDS = 8;
-    private static final double SILENCE_SECONDS = 3.0; // 4 seconds of silence
+    private static final double SILENCE_SECONDS = 4.0; // 4 seconds of silence
 
 
     /** Capture a small chunk for threshold detection */
@@ -28,8 +29,8 @@ public class CaptureAudio {
     }
 
     /** Capture full user audio until silence or timeout */
-    public synchronized static byte[] captureUserAudio() throws LineUnavailableException, IOException {
-            return record();
+    public synchronized static byte[] captureUserAudio(Deque<byte[]> preBuffer) throws LineUnavailableException, IOException {
+            return record(preBuffer);
     }
 
     /** Calculate decibel level of a buffer */
@@ -56,11 +57,19 @@ public class CaptureAudio {
     }
 
 
-    private static byte[] record() throws IOException, LineUnavailableException {
+
+    private static byte[] record(Deque<byte[]> preBuffer) throws IOException, LineUnavailableException {
         try (TargetDataLine line = setupLine()) {
             line.start();
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             byte[] buffer = new byte[BUFFER_SIZE];
+
+            // --- PREPEND PRE-BUFFER ---
+            if (preBuffer != null) {
+                for (byte[] chunk : preBuffer) {
+                    out.write(chunk);
+                }
+            }
 
             long silenceStart = -1;
             long startTime = System.currentTimeMillis();
@@ -84,7 +93,9 @@ public class CaptureAudio {
                 } else {
                     if (silenceStart < 0) silenceStart = System.currentTimeMillis();
                     long silentDuration = System.currentTimeMillis() - silenceStart;
-                    if (silentDuration >= SILENCE_SECONDS * 1000 && out.size() > 0) break;
+                    if (silentDuration >= SILENCE_SECONDS * 1000 && out.size() > (preBuffer != null ? preBuffer.size() * BUFFER_SIZE : 0)) {
+                        break;
+                    }
                 }
 
                 // Timeout safety
@@ -109,7 +120,7 @@ public class CaptureAudio {
     }
 
 
-
+/*
 
     public static void main(String[] args) {
         SetEnv.load(".env");
@@ -135,5 +146,5 @@ public class CaptureAudio {
             System.err.println("Error during capture/playback: " + e.getMessage());
             e.printStackTrace();
         }
-    }
+    }*/
 }

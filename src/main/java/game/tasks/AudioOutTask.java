@@ -5,7 +5,6 @@ import game.gameUtil.helpers.LevelUtil;
 import game.gameUtil.objs.WorldMap;
 
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Runnable task for playing audio output for a given GameLevel.

@@ -49,7 +49,7 @@ public class OpenAIUtil {
                     .create(params)
                     .asTranscription();
 
-            System.out.println("inside util class fn: Transcript: " + transcription.text());
+            System.out.println("Direct return from whisper inside API class inside util class fn: Transcript: " + transcription.text());
 
             return transcription.text();
         } catch (Exception e) {

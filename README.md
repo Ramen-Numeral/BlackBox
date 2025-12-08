@@ -1,19 +1,13 @@
-Running the Docker Build
-Make sure you are inside a directory that contains a .env.secrets file before running:
+Upon startup, you will be asked to select a threshold above which user speech will be detected. 
+If the microphone is not picking up on your speech, try lowering the threshold.
 
-docker run -it \
--v $(pwd):/app \
--w /app \
---name blackbox_run \
-blackbox
-
-This program requires valid API credentials. It will not run without:
+This program requires a .env.secrets file that contains: 
 - An OpenAI API key
 - AWS access key and secret
 - A properly formatted .env.secrets file in the working directory
 
 Overview
-This project is built as an audio command pipeline. The system operates through several tasks:
+This project is an audio command pipeline. The system operates through several tasks:
 1. Ambient Decibel Monitoring:
    A background thread continually measures ambient sound levels. When the user speaks above a defined threshold, it triggers the recorder.
 2. Rolling Pre-buffer Recorder:
@@ -29,4 +23,3 @@ This project is built as an audio command pipeline. The system operates through 
 
 Build Details
 Gradle is used for dependency management, including AWS and OpenAI SDKs.
-Docker is used for packaging.

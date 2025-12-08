@@ -5,9 +5,11 @@ import game.gameUtil.helpers.LevelUtil;
 
 import java.io.*;
 import java.util.*;
+import java.io.Serial;
 
-//holds a respective level including its audio/embedding/etc to be pulled in by the threads when appropriate
-public final class GameLevel {
+public final class GameLevel implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     // --- Final Fields ---
     private final byte[] commandPromptAudio;
@@ -20,7 +22,7 @@ public final class GameLevel {
     private boolean played;
 
     public GameLevel(String txtPath) throws IOException {
-        HashMap<String, String> vals = LevelUtil.parseLvlTxt(txtPath); //create a map for the "command" "speech text" etc keys from the template
+        HashMap<String, String> vals = LevelUtil.parseLvlTxt(txtPath);
         System.out.println("Parsed level file contents: " + vals);
         this.availableCommands = LevelUtil.createAvailableCommand(vals);
         this.command = vals.get("command");
@@ -41,10 +43,8 @@ public final class GameLevel {
     public boolean isAvailableCommand(String com){return availableCommands.contains(com);}
 
 
-    //get the whisper transcript for gui
     public String getNarrationText(){return narrationTxt;}
 
-    //pads audio so it doesn't clip
     private byte[] addSilencePadding(byte[] audio, int sampleRate, int bytesPerSample, int seconds) {
         int silenceLength = sampleRate * bytesPerSample * seconds; // mono channel
         byte[] padded = new byte[audio.length + silenceLength * 2]; // front + back

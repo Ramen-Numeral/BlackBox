@@ -1,4 +1,6 @@
 package game;
+import game.GUI.TerminalGUI;
+import game.GUI.ThresholdGUI;
 import game.stateRoutines.StartupRoutine;
 import game.tasks.AudioOutTask;
 import game.tasks.CommandTask;
@@ -39,7 +41,7 @@ public class Main {
 
         // --- Start GUI on Swing thread ---
         SwingUtilities.invokeLater(() -> { // gui that shows the game
-            GUI gui = new GUI(guiQueue);
+            TerminalGUI terminalGui = new TerminalGUI(guiQueue);
         });
 
 

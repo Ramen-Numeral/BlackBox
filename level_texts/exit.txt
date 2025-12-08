@@ -1,0 +1,3 @@
+command : exit
+speech text : thank you for playing. goodbye.
+available commands :

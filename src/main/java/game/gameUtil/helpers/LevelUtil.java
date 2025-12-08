@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-//aux class to support the GameLevel object
 public class LevelUtil {
 
     public static void playPromptChoices(GameLevel level) {
@@ -27,7 +26,8 @@ public class LevelUtil {
         AudioOutput.playByteArray(level.getNarrationAudio());
     }
 
-    //read the template, add it to a map for commands, next steps, and narration text
+
+
     public static HashMap<String, String> parseLvlTxt(String txtpath){
         String localPath = txtpath.trim().toLowerCase();
         HashMap<String, String> label2val = new HashMap<>();
@@ -55,7 +55,7 @@ public class LevelUtil {
         }
         return label2val;
     }
-    //loops through commands listed in the level template, adds them to be played back to the user as next steps
+
     public static ArrayList<String> createAvailableCommand(HashMap<String, String> vals){
         String options = vals.get("available commands");
         ArrayList<String> coms = new ArrayList<>();

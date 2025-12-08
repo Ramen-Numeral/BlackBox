@@ -1,4 +1,5 @@
 package game.commandUtil;
+import game.gameUtil.helpers.LevelUtil;
 import game.gameUtil.helpers.WorldUtil;
 import game.gameUtil.objs.GameLevel;
 import game.gameUtil.objs.WorldMap;
@@ -31,20 +32,26 @@ public class CommandUtil {
         return com;
     }
 
-    public static String runCommand(String com){
-       com = com.trim().toLowerCase();
-        switch (com){
-            case "exit" -> {return exitProcess();}
-            //special cases for pipeline commands not available to the user
-            case "command intro" -> {return "command intro";}
-            case "user input error" -> {return "user input error";}
-            default -> {return levelProcess(com);}
+    public static String runCommand(String com) {
+        com = com.trim().toLowerCase();
+        switch (com) {
+            case "exit":
+                return exitProcess();
+            case "command intro":
+                return "command intro";
+            case "user input error":
+                return "user input error";
+            default:
+                return levelProcess(com);
         }
     }
 
 
+
     public static void systemExitRoutine() {
         //save world
+        LevelUtil.playNarrationAudio(WorldMap.getLevel("exit"));
+
         WorldUtil.writeOutWorldMap();
         //exit system
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {

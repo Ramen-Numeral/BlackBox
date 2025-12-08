@@ -1,5 +1,6 @@
 package game.tasks;
 
+import game.commandUtil.CommandUtil;
 import game.gameUtil.objs.GameLevel;
 import game.gameUtil.helpers.LevelUtil;
 import game.gameUtil.objs.WorldMap;
@@ -38,6 +39,7 @@ public class AudioOutTask implements Runnable {
                 //if there's a user input error, play that file and the previous one
                 //else continue and set the last played to the command for future repetition
                 if(command.equals("user input error")){
+                    audioQueue.offer("user input error");
                     audioQueue.offer(lastLevel);
                 }
                     lastLevel = command;
@@ -53,6 +55,7 @@ public class AudioOutTask implements Runnable {
                 if(!command.equals("load sequence")) {
                     LevelUtil.playNarrationAudio(WorldMap.getLevel("command intro"));
                 }
+
                 //play the choices
                 LevelUtil.playPromptChoices(level);
 

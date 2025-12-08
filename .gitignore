@@ -29,7 +29,6 @@ bin/
 .DS_Store
 
 ### Environment variables ###
-.env
 .env.*
 
 ### Gradle ###
@@ -38,4 +37,3 @@ bin/
 !gradle/wrapper/gradle-wrapper.jar
 !gradle/wrapper/gradle-wrapper.properties
 .idea
-.gradle

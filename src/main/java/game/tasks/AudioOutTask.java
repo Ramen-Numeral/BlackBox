@@ -6,7 +6,7 @@ import game.gameUtil.objs.WorldMap;
 
 import java.util.concurrent.BlockingQueue;
 
-
+//accepts a task from the command thread, then plays back the audio, communicates with gui
 public class AudioOutTask implements Runnable {
 
     private String lastLevel;
@@ -31,12 +31,12 @@ public class AudioOutTask implements Runnable {
                 GameLevel level = WorldMap.getLevel(command);
                 String guiTxt = level.getNarrationText();
                 System.out.println("guiTxt put into the queue for output");
+                //put narration text on gui queue for output
                 GUITextQueue.offer(guiTxt);
                 System.out.println("Audio running level " + level.toString());
 
-                //if theres a user input error, play that file and the previous one
+                //if there's a user input error, play that file and the previous one
                 //else continue and set the last played to the command for future repetition
-                //if user want to go back, load the last level
                 if(command.equals("user input error")){
                     audioQueue.offer(lastLevel);
                 }

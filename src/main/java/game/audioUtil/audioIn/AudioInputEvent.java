@@ -8,16 +8,15 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 
+//takes  a user recording, gets a transcription and its embedding, checks the embedding match against available commands
 
 public class AudioInputEvent {
     private final String transcript;
     private final double[] embedding;
-   // private final byte[] input;
+    // private final byte[] input;
     private static final double MIN_MATCH_THRESHOLD = 0.75;
 
-    //TODO assess if needed deprecated version, or add string arg,, never played back waste of mem?
     public AudioInputEvent(byte[] input) {
-        //this.input = input;
         this.transcript = APICalls.callWhisper(SetEnv.get("USER_INPUT_FILE"));
         String normal = transcript.toLowerCase().replaceAll("[^a-z ]", "");
         this.embedding = APICalls.callEmbeddings(normal);

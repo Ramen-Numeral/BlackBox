@@ -7,6 +7,7 @@ import java.io.*;
 import java.util.stream.IntStream;
 import java.util.Deque;
 
+//utilities to record audio input
 public class CaptureAudio {
 
     private static final float SAMPLE_RATE = 16000.0f;
@@ -16,15 +17,12 @@ public class CaptureAudio {
     private static final int TIMEOUT_SECONDS = 8;
     private static final double SILENCE_SECONDS = 2.5; // 4 seconds of silence
 
-
-
-
-    /** Capture full user audio until silence or timeout */
+//recording wrapper
     public synchronized static byte[] captureUserAudio(Deque<byte[]> preBuffer) throws LineUnavailableException, IOException {
             return record(preBuffer);
     }
 
-    /** Calculate decibel level of a buffer */
+    //calculate decibels of a sample of audio
     public static double calculateDecibels(byte[] audioData) {
         double meanSquare = IntStream.range(0, audioData.length / 2)
                 .mapToDouble(i -> {
@@ -38,7 +36,7 @@ public class CaptureAudio {
         return 20 * Math.log10(rms / 32768.0);
     }
 
-    /** Setup the mic line */
+    //set mic line so always consistent across audio fns
     public static TargetDataLine setupLine() throws LineUnavailableException {
         AudioFormat format = new AudioFormat(SAMPLE_RATE, SAMPLE_SIZE, 1, true, true);
         DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
@@ -48,14 +46,14 @@ public class CaptureAudio {
     }
 
 
-
+    //recording times out on extended silence or a timer if that is not met
     private static byte[] record(Deque<byte[]> preBuffer) throws IOException, LineUnavailableException {
         try (TargetDataLine line = setupLine()) {
             line.start();
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             byte[] buffer = new byte[BUFFER_SIZE];
 
-            // --- PREPEND PRE-BUFFER ---
+            // --- prepend prebuffer ---
             if (preBuffer != null) {
                 for (byte[] chunk : preBuffer) {
                     out.write(chunk);
@@ -72,7 +70,7 @@ public class CaptureAudio {
 
                 out.write(buffer, 0, bytesRead);
 
-                // Calculate decibels for actual bytes read
+                // calculate decibels for actual bytes read
                 byte[] chunkCopy = new byte[bytesRead];
                 System.arraycopy(buffer, 0, chunkCopy, 0, bytesRead);
                 double db = calculateDecibels(chunkCopy);
@@ -96,7 +94,7 @@ public class CaptureAudio {
             line.stop();
             byte[] audioBytes = out.toByteArray();
 
-            // Write to .wav for testing
+            // write to .wav to be sent to whisper (each input overwrites)
             String outputPath = SetEnv.get("USER_INPUT_FILE");
             try (ByteArrayInputStream bais = new ByteArrayInputStream(audioBytes)) {
                 AudioInputStream ais = new AudioInputStream(bais, format, audioBytes.length / format.getFrameSize());

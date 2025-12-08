@@ -13,8 +13,9 @@ import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
+//retroish terminal style gui to output game progress
+//spawns a text out task from within to continually update the jtexarea
 public class GUI {
 
     private JFrame frame;
@@ -50,7 +51,6 @@ public class GUI {
         CRTPanel crt = new CRTPanel();
         crt.setLayout(new BorderLayout());
         crt.setBounds(LEFT, TOP, terminalWidth, terminalHeight);
-
 
         // Text Area
         textArea = new JTextArea();
@@ -132,6 +132,7 @@ public class GUI {
     }
 
     // ================= Caret =================
+    //stylized leading caret
     static class BlinkCaret extends DefaultCaret {
         private boolean visible = true;
         private final int thickness = 6;
@@ -172,6 +173,7 @@ public class GUI {
     }
 
     // ================= CRTPanel =================
+    //panel to hold jtext area and paint it w scanlines etc
     static class CRTPanel extends JPanel {
         private static final int SCANLINE_SPACING = 3;
 

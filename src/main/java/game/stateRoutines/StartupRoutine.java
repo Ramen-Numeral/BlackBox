@@ -5,13 +5,13 @@ import game.gameUtil.helpers.WorldUtil;
 import game.gameUtil.objs.WorldMap;
 import game.stateRoutines.envsetup.SetEnv;
 
-import java.io.File;
-
 import static game.gameUtil.helpers.WorldUtil.loadWorldMap;
 
+//loads the levels if there are any in the .dat file
+//if not, builds the map / does the calls for audio embeddings etc.
 public class StartupRoutine {
     public static void startupRoutine(){
-        SetEnv.load();
+        SetEnv.load(); //get the environmental vars from .env and .env.secrets
         CommandUtil.initGlobalCommands();
 
         if(!loadWorldMap()) {
@@ -19,8 +19,8 @@ public class StartupRoutine {
         }
 
         WorldUtil.writeOutWorldMap();
-        //TODO add a clear on all of the setPlayed();
-        if(WorldMap.isEmpty()){ // only rebuild if absolutely necessary
+
+        if(WorldMap.isEmpty()){ // extra catch in case build/load falsely succeeds
             System.out.println("[WORLD-LOADER] WorldMap still empty, ERROR.");
             }
         }

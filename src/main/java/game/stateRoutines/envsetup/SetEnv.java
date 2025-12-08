@@ -12,8 +12,9 @@ public class SetEnv {
     private static final HashMap<String, String> envMap = new HashMap<>();
 
     public static HashMap<String, String> load() {
-        String[] files = {".env", ".env.secrets"};
+        String[] files = {".env", ".env.secrets"}; //.env are global vars .env.secrets are api keys
 
+        //map all of the variables to an environment map to be called internally
         for(String file : files)
             try (Stream<String> lines = Files.lines(Paths.get(file))) {
                 lines.map(String::trim)                          // trim whitespace

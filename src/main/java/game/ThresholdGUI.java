@@ -1,16 +1,12 @@
 package game;
 
-import game.audioUtil.audioOut.AudioOutput;
-import game.gameUtil.objs.WorldMap;
-import game.stateRoutines.StartupRoutine;
 import game.tasks.*;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.concurrent.*;
 
+//small gui to start game that accepts the users desired threshold for speech detection
 public class ThresholdGUI extends JFrame {
 
     private final JTextField thresholdField;

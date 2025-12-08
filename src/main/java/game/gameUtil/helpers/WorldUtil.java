@@ -7,9 +7,7 @@ import game.stateRoutines.envsetup.SetEnv;
 import java.io.*;
 import java.util.HashMap;
 
-/**
- * Utility class for saving and loading WorldMap.
- */
+//load save aux class for the world map that holds all levels
 public final class WorldUtil {
 
     public static boolean writeOutWorldMap() {

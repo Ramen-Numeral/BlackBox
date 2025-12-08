@@ -4,7 +4,7 @@ import java.util.stream.IntStream;
 
 public class VectorComparison {
 
-  //for embedding comparison
+  //helper for embedding comparison
     public static double cosineSimilarity(double[] ui, double[] vi) {
         if (ui == null || vi == null)
             throw new IllegalArgumentException("Vectors must not be null");

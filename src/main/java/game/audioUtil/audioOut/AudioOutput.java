@@ -1,16 +1,11 @@
 package game.audioUtil.audioOut;
 
-import game.api.utilityJSON.AWSUtil;
-import game.stateRoutines.envsetup.SetEnv;
-
 import javax.sound.sampled.*;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
+//utility to help audio out thread output to speakers fr byte array
 public class AudioOutput {
-
 
     public static void playByteArray(byte[] audioData) {
         // Polly default PCM: 16 kHz, 16-bit, mono, little-endian
@@ -38,10 +33,10 @@ public class AudioOutput {
                     audioLine.write(buffer, 0, bytesRead);
                 }
 
-                // Ensure all remaining audio in the line's internal buffer is played
+                // ensure all remaining audio in the line's internal buffer is played
                 audioLine.drain();
 
-                // Add a small sleep to make sure the last few frames finish
+                // sleep to make sure the last few frames finish
                 Thread.sleep(100);  // 100 ms buffer
 
             } catch (LineUnavailableException e) {

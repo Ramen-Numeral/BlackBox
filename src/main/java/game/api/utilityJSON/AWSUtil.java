@@ -15,7 +15,7 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
-
+//handles system/side posting and getting for audio using aws sdk
 public class AWSUtil {
 
     public static byte[] pollyParseResponse(InputStream in) throws IOException {

@@ -8,15 +8,16 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+//listens for an input trigger
 public class ListenerTask implements Runnable {
 
-    private static double THRESHOLD_DB;
-    private static final int REQUIRED_CHUNKS = 6;
-    private static final long SAMPLE_INTERVAL_MS = 5;
+    private static double THRESHOLD_DB; //passed in by the threshold gui
+    private static final int REQUIRED_CHUNKS = 6; //amount of samples above threshold to trigger recorder
+    private static final long SAMPLE_INTERVAL_MS = 5; //frequency of sample
 
     private final BlockingQueue<CompletableFuture<String>> commandQueue;
-    private final Deque<byte[]> preBuffer;
-    private Thread currentRecorder;
+    private final Deque<byte[]> preBuffer; //shared w audio service and recorder
+    private Thread currentRecorder; //recorder spawned inside in order to block listener from starting new input event mid recording
     private final Object recorderLock = new Object();
 
     private int aboveThresholdCount = 0;
@@ -28,6 +29,7 @@ public class ListenerTask implements Runnable {
         THRESHOLD_DB = thresh;
     }
 
+    //runs continuously to check if ambient noise level spikes, signalling user speech
     @Override
     public void run() {
         System.out.println("[Listener] Monitoring for speech...");
@@ -44,6 +46,7 @@ public class ListenerTask implements Runnable {
         System.out.println("[Listener] Listener thread exiting.");
     }
 
+    //checks the decibel level of the last bit in the preBuffer
     private void processLatestChunk() throws InterruptedException, ExecutionException {
         byte[] latestChunk;
         synchronized (preBuffer) {
@@ -56,6 +59,7 @@ public class ListenerTask implements Runnable {
         checkThresholdAndSpawnRecorder(db);
     }
 
+    //checks that threshold has been passed, resets if too long has happened between last above threshold event
     private void checkThresholdAndSpawnRecorder(double db) throws InterruptedException, ExecutionException {
         long now = System.currentTimeMillis();
 
@@ -83,7 +87,6 @@ public class ListenerTask implements Runnable {
                 System.out.println("[Listener] Recorder already running, skipping spawn.");
                 return;
             }
-
             CompletableFuture<String> audioFuture = new CompletableFuture<>();
             Deque<byte[]> bufferSnapshot;
             synchronized (preBuffer) {
@@ -93,8 +96,8 @@ public class ListenerTask implements Runnable {
 
             currentRecorder = new Thread(new RecorderTask(audioFuture, bufferSnapshot));
             currentRecorder.start();
-            commandQueue.offer(audioFuture);
-            String result = audioFuture.get();
+            commandQueue.offer(audioFuture); //put the future on the queue for command
+            String result = audioFuture.get(); //block until the recorder has finished
             Thread.currentThread().sleep(1000); //if a recording was found sleep
             System.out.println("[Listener] Recorder finished, result: " + result);
         }

@@ -6,6 +6,7 @@ import javax.sound.sampled.TargetDataLine;
 import java.util.Deque;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+//continuously records a prebuffer to append to user input, preventing loss
 public class AudioServiceTask implements Runnable {
 
     private static final int BUFFER_SIZE = 1024;

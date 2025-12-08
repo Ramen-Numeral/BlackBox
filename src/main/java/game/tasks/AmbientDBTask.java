@@ -7,6 +7,8 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.concurrent.ExecutionException;
 
+//only used for start up gui. mirror of listener task but does not spawn a recorder.
+//solely used to output decibel readout for user
 public class AmbientDBTask implements Runnable {
 
     private static final long SAMPLE_INTERVAL_MS = 5;

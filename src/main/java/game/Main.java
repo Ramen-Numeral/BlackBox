@@ -16,43 +16,36 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        StartupRoutine.startupRoutine();
+        StartupRoutine.startupRoutine(); //loads audio / embeddings so api calls don't have to be made each load
 
         CompletableFuture<Double> dbFuture = new CompletableFuture<>();
 
-        SwingUtilities.invokeLater(() -> {
+        SwingUtilities.invokeLater(() -> { //gui to get db threshold
             new ThresholdGUI(dbFuture);
         });
 
 
         // Main thread waits for user input
-        double threshold = dbFuture.get();
+        double threshold = dbFuture.get(); //force stop until user selects db input threshold
 
         System.out.println("[MAIN] User chose threshold: " + threshold);
         System.out.println("[MAIN] Starting audio pipeline...");
 
         // Queues for pipeline
-        BlockingQueue<CompletableFuture<String>> commandQueue = new ArrayBlockingQueue<>(10);
-        BlockingQueue<String> audioQueue = new ArrayBlockingQueue<>(10); // existing audio pipeline queue
-        BlockingQueue<String> guiQueue = new LinkedBlockingQueue<>(); // new GUI queue for TextOutTask
-
-        // Shared pre-buffer for Listener + AudioService
-        Deque<byte[]> sharedPreBuffer = new ArrayDeque<>();
+        BlockingQueue<CompletableFuture<String>> commandQueue = new ArrayBlockingQueue<>(10); //recorder -> command processing
+        BlockingQueue<String> audioQueue = new ArrayBlockingQueue<>(10); // audio pipeline queue
+        BlockingQueue<String> guiQueue = new LinkedBlockingQueue<>(); //Text output gui
+        Deque<byte[]> sharedPreBuffer = new ArrayDeque<>(); //rolling prebuffer to append to audio input to guarantee no loss of input
 
         // --- Start GUI on Swing thread ---
-        SwingUtilities.invokeLater(() -> {
+        SwingUtilities.invokeLater(() -> { // gui that shows the game
             GUI gui = new GUI(guiQueue);
         });
 
 
         // --- Startup audio ---
-        audioQueue.put("load sequence");
-
+        audioQueue.put("load sequence"); //start the game
         System.out.println("[MAIN] Starting audio pipeline...");
-
-
-
-
 
 
         // --- Start AudioService (fills shared pre-buffer) ---
@@ -74,7 +67,7 @@ public class Main {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
                     CommandTask task = new CommandTask(commandQueue, audioQueue); // unchanged
-                    task.call(); // blocks until a command is processed
+                    task.run();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

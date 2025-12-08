@@ -12,12 +12,11 @@ import game.stateRoutines.envsetup.SetEnv;
 import java.io.File;
 import java.util.List;
 
+//utilities to assist with whisper/embeddings calls using open ai sdk
 public class OpenAIUtil {
 
-    /**
-     * Transcribe audio bytes using Whisper model
-     */
 
+    //sets the secrets for call
     public static OpenAIClient clientUtil(){
         String apiKey = SetEnv.get("OPENAI_API_KEY");
 
@@ -27,13 +26,14 @@ public class OpenAIUtil {
         return client;
     }
 
+    //takes in the audio file path and xscribe the audio
     public static String transcribeAudio(String string) {
         OpenAIClient client = clientUtil();
         File audioFile = new File(string);
 
         try {
             TranscriptionCreateParams params = TranscriptionCreateParams.builder()
-                    .file(audioFile.toPath())           // pass File object, not string
+                    .file(audioFile.toPath())
                     .model(AudioModel.WHISPER_1)
                     .build();
 
@@ -51,9 +51,7 @@ public class OpenAIUtil {
     }
 
 
-    /**
-     * Get embeddings for text
-     */
+    //get embedding value of text for comparison
     public static double[] getEmbeddings(String text) {
         OpenAIClient client = clientUtil();
 

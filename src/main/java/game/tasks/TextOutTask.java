@@ -3,6 +3,7 @@ package game.tasks;
 import javax.swing.*;
 import java.util.concurrent.BlockingQueue;
 
+//appends to the text area as narration continues
 public class TextOutTask implements Runnable {
 
     private final BlockingQueue<String> GUITextQueue;

@@ -3,21 +3,19 @@ package game.tasks;
 import game.commandUtil.CommandUtil;
 
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-/**
- * Callable task for executing commands from recorded audio.
- * Only forwards "user input error" to the audio queue after 5 consecutive failures.
- */
-public class CommandTask implements Callable<Void> {
 
-    private final BlockingQueue<CompletableFuture<String>> commandQueue;
+//class that controls command processing to clear queue of stale commands
+//handle failed input before sending to the audio output
+public class CommandTask implements Runnable {
+
+    private final BlockingQueue<CompletableFuture<String>> commandQueue; //shared with listener
     private final BlockingQueue<String> audioQueue;
     private String lastPlayed = "";
     private static int errorCount = 0;
-    private static final int MAX_ERROR_COUNT = 10;
+    private static final int MAX_ERROR_COUNT = 15;
 
     public CommandTask(BlockingQueue<CompletableFuture<String>> commandQueue,
                        BlockingQueue<String> audioQueue) {
@@ -26,11 +24,11 @@ public class CommandTask implements Callable<Void> {
     }
 
     @Override
-    public Void call() {
+    public void run() {
         try {
             // Wait for the next recorded command
             CompletableFuture<String> future = commandQueue.take();
-            String command = future.get(); // blocks until recording finishes
+            String command = future.get();
 
             System.out.println("[COMMAND THREAD] Received command: " + command);
 
@@ -43,10 +41,10 @@ public class CommandTask implements Callable<Void> {
                     if (lastPlayed != null && !lastPlayed.isEmpty()) {
                         audioQueue.offer(lastPlayed); // repeat previous valid command
                     } else {
-                        audioQueue.offer("start a new game"); // fallback
+                        audioQueue.offer("exit"); // fallback exit to prevent game running infinitely/spam calling api
                     }
                 }
-                return null; // do not process invalid command
+                return; // do not process invalid command
             }
 
             // Valid command: reset error streak
@@ -67,7 +65,7 @@ public class CommandTask implements Callable<Void> {
             throw new RuntimeException(e);
         }
 
-        return null;
+        return;
     }
 
     private boolean isInvalidCommand(String str) {

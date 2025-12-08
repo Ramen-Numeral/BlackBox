@@ -1,3 +1,0 @@
-command : river
-speech text : You reach a rushing river. The water looks deep and cold.
-available commands : cave$lookup$start

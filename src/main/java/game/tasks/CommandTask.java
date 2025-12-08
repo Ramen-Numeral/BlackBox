@@ -17,7 +17,7 @@ public class CommandTask implements Callable<Void> {
     private final BlockingQueue<String> audioQueue;
     private String lastPlayed = "";
     private static int errorCount = 0;
-    private static final int MAX_ERROR_COUNT = 5;
+    private static final int MAX_ERROR_COUNT = 10;
 
     public CommandTask(BlockingQueue<CompletableFuture<String>> commandQueue,
                        BlockingQueue<String> audioQueue) {
@@ -40,11 +40,10 @@ public class CommandTask implements Callable<Void> {
                 System.out.println("[COMMAND THREAD] Error detected. Current streak: " + errorCount);
                 if (errorCount >= MAX_ERROR_COUNT) {
                     System.out.println("[COMMAND THREAD] Max error count reached. Sending user input error.");
-                    audioQueue.offer("user input error");
                     if (lastPlayed != null && !lastPlayed.isEmpty()) {
                         audioQueue.offer(lastPlayed); // repeat previous valid command
                     } else {
-                        audioQueue.offer("menu"); // fallback
+                        audioQueue.offer("start a new game"); // fallback
                     }
                 }
                 return null; // do not process invalid command
@@ -57,9 +56,12 @@ public class CommandTask implements Callable<Void> {
             System.out.println("[COMMAND THREAD] Processing command: " + command);
             String audioKey = CommandUtil.runCommand(command);
 
-
+            System.out.println("[COMMAND THREAD] command returned from processing " + audioKey);
+            audioQueue.clear();
             audioQueue.offer(audioKey);
 
+
+            System.out.println("[COMMAND THREAD] ouffored to the audio queue " + audioQueue.toString());
 
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);

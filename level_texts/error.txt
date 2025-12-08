@@ -1,3 +1,0 @@
-command : error
-speech text : An error has occurred.
-available commands :

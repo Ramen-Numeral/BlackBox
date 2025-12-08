@@ -1,0 +1,3 @@
+command : look at your snow angel
+speech text : You are too afraid of your own shadow. Your shoulders release tension you didn't realize they had been holding when your snow angel looks perfectly holy. Perhaps beautiful is a bit of a stretch, but there are no horns, no tails. Good enough.
+available commands : look over your shoulder$keep walking

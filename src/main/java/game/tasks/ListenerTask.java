@@ -25,7 +25,7 @@ public class ListenerTask implements Runnable {
     public ListenerTask(BlockingQueue<CompletableFuture<String>> commandQueue, Deque<byte[]> sharedPreBuffer, double thresh) {
         this.commandQueue = commandQueue;
         this.preBuffer = sharedPreBuffer;
-        THRESHOLD_DB = (thresh);
+        THRESHOLD_DB = thresh;
     }
 
     @Override

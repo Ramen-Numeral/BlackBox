@@ -27,21 +27,8 @@ public class LevelUtil {
         AudioOutput.playByteArray(level.getNarrationAudio());
     }
 
-    public static void playNarrationAudio(GameLevel level, AtomicBoolean stopFlag) throws Exception {
-        byte[] narration = level.getNarrationAudio();
-        AudioOutput.playByteArray(narration);
-    }
 
-    /** Interruptible prompt choices playback */
-    public static void playPromptChoices(GameLevel level, AtomicBoolean stopFlag) throws Exception {
-        for (String command : level.getAvailableCommands()) {
-            GameLevel choice = WorldMap.getLevel(command);
-            if (choice != null && !choice.isPlayed()) {
-                if (stopFlag.get()) return; // interrupt if new input
-                AudioOutput.playByteArrayInterruptible(choice.getCommandPromptAudio(), stopFlag);
-            }
-        }
-    }
+
     public static HashMap<String, String> parseLvlTxt(String txtpath){
         String localPath = txtpath.trim().toLowerCase();
         HashMap<String, String> label2val = new HashMap<>();
@@ -76,6 +63,7 @@ public class LevelUtil {
         if (options != null) {
             String[] commands = options.trim().split("\\$");
             coms.addAll(Arrays.asList(commands));
+            coms.add(coms.size()-1, "or");
         }
         return coms;
     }

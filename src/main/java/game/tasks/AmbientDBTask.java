@@ -55,10 +55,7 @@ public class AmbientDBTask implements Runnable {
         System.out.println("[AmbientDBTask] Listener thread exiting.");
     }
 
-    /**
-     * Returns the latest calculated decibel from the buffer.
-     * Thread-safe and can be called repeatedly from GUI or other threads.
-     */
+
     public double getDB() throws InterruptedException, ExecutionException {
         byte[] latestChunk;
         synchronized (preBuffer) {

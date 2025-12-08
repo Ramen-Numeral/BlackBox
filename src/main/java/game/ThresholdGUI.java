@@ -90,23 +90,4 @@ public class ThresholdGUI extends JFrame {
 
     }
 
-
-    // --- Minimal main to test the GUI ---
-    public static void main(String[] args) {
-        CompletableFuture<Double> future = new CompletableFuture<>();
-
-        // GUI must be created on EDT
-        SwingUtilities.invokeLater(() -> new ThresholdGUI(future));
-
-        // Main thread blocks until user clicks submit
-        try {
-            double threshold = future.get();
-            System.out.println("[MAIN] User selected threshold: " + threshold);
-            System.out.println("[MAIN] You can now start your audio pipeline...");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-
 }

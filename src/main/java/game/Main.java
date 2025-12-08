@@ -42,26 +42,17 @@ public class Main {
         // --- Start GUI on Swing thread ---
         SwingUtilities.invokeLater(() -> {
             GUI gui = new GUI(guiQueue);
-            guiQueue.offer("loading...");
         });
 
-        // --- Start AudioOutTask thread ---
-        AudioOutTask audioOutTask = new AudioOutTask(audioQueue, guiQueue);
-        Thread audioThread = new Thread(audioOutTask, "AudioThread");
-        audioThread.start();
+
         // --- Startup audio ---
-        audioQueue.put("start game");
+        audioQueue.put("load sequence");
 
         System.out.println("[MAIN] Starting audio pipeline...");
 
-        // Queues for pipeline
 
-        // --- Start GUI on Swing thread ---
-        SwingUtilities.invokeLater(() -> {
-            GUI gui = new GUI(guiQueue); // GUI now consumes guiQueue
-        });
 
-        // --- Startup audio ---
+
 
 
         // --- Start AudioService (fills shared pre-buffer) ---
@@ -90,5 +81,9 @@ public class Main {
             }
         });
         System.out.println("[MAIN] CommandThread started.");
+        AudioOutTask audioOutTask = new AudioOutTask(audioQueue, guiQueue);
+        Thread audioThread = new Thread(audioOutTask, "AudioThread");
+        audioThread.start();
     }
+
 }

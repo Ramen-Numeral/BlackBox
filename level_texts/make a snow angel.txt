@@ -1,0 +1,3 @@
+command : make a snow angel
+speech text : There once was a girl that told you she loved you while making a mud angel. She pulled you down into the clay. You laughed and laughed as you flapped your arms. When she stood up, there was a perfect mud angel. When you stood up, you had been too afraid to look at the place you had lain. Right now you are flapping your arms, up and down, up and down. You want to believe that “angel” could live in the space next to "beautiful." Then you get up.
+available commands : look at your snow angel$look over your shoulder$keep walking

@@ -17,16 +17,7 @@ public class CaptureAudio {
     private static final double SILENCE_SECONDS = 2.5; // 4 seconds of silence
 
 
-    /** Capture a small chunk for threshold detection */
-    public static byte[] captureAudioChunk() throws LineUnavailableException {
-        try (TargetDataLine line = setupLine()) {
-            line.start();
-            byte[] buffer = new byte[BUFFER_SIZE];
-            line.read(buffer, 0, buffer.length);
-            line.stop();
-            return buffer;
-        }
-    }
+
 
     /** Capture full user audio until silence or timeout */
     public synchronized static byte[] captureUserAudio(Deque<byte[]> preBuffer) throws LineUnavailableException, IOException {
@@ -119,32 +110,4 @@ public class CaptureAudio {
         }
     }
 
-
-/*
-
-    public static void main(String[] args) {
-        SetEnv.load(".env");
-        System.out.println("Starting microphone test. Speak something...");
-
-        try {
-            byte[] audioData = CaptureAudio.captureUserAudio();
-            System.out.println("Captured " + audioData.length + " bytes of audio.");
-
-            AudioFormat format = new AudioFormat(SAMPLE_RATE, SAMPLE_SIZE, 1, true, true);
-            try (AudioInputStream ais = new AudioInputStream(
-                    new ByteArrayInputStream(audioData),
-                    format,
-                    audioData.length / format.getFrameSize()
-            )) {
-                System.out.println("Playing back captured audio...");
-                AudioOutput.playStream(ais);
-            }
-
-            System.out.println("Playback complete.");
-
-        } catch (LineUnavailableException | IOException e) {
-            System.err.println("Error during capture/playback: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }*/
 }

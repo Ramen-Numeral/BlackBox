@@ -15,20 +15,20 @@ public class SetEnv {
         String[] files = {".env", ".env.secrets"};
 
         for(String file : files)
-        try (Stream<String> lines = Files.lines(Paths.get(file))) {
-            lines.map(String::trim)                          // trim whitespace
-                    .filter(line -> !line.isEmpty() && !line.startsWith("#")) // ignore blank/comment lines
-                    .forEach(line -> {
-                        int eqIdx = line.indexOf('=');
-                        if (eqIdx != -1) {
-                            envMap.put(line.substring(0, eqIdx).trim().toUpperCase(),
-                                    line.substring(eqIdx + 1).trim());
-                        }
-                    });
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Env file read error");
-        }
+            try (Stream<String> lines = Files.lines(Paths.get(file))) {
+                lines.map(String::trim)                          // trim whitespace
+                        .filter(line -> !line.isEmpty() && !line.startsWith("#")) // ignore blank/comment lines
+                        .forEach(line -> {
+                            int eqIdx = line.indexOf('=');
+                            if (eqIdx != -1) {
+                                envMap.put(line.substring(0, eqIdx).trim().toUpperCase(),
+                                        line.substring(eqIdx + 1).trim());
+                            }
+                        });
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("Env file read error");
+            }
 
 
         return envMap;

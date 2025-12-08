@@ -1,0 +1,3 @@
+command : look over your shoulder
+speech text : A young girl is across the street, burying her laughter in her collar. You flush slightly, before you realize just what you are seeing. "Go home, now!" you cry. She doesn't even blink. Your hands grow cold. Your heart starts beating more quickly. Sweat mixes with the snow landing on your ungloved hands, turning into a brackish slurry.
+available commands : keep walking$approach the girl

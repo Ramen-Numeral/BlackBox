@@ -1,0 +1,3 @@
+command : or
+speech text : or
+available commands :

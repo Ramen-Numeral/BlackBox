@@ -12,23 +12,17 @@ import java.util.Map;
 public class AudioInputEvent {
     private final String transcript;
     private final double[] embedding;
-    private final byte[] input;
+   // private final byte[] input;
     private static final double MIN_MATCH_THRESHOLD = 0.75;
 
     //TODO assess if needed deprecated version, or add string arg,, never played back waste of mem?
     public AudioInputEvent(byte[] input) {
-        this.input = input;
+        //this.input = input;
         this.transcript = APICalls.callWhisper(SetEnv.get("USER_INPUT_FILE"));
         String normal = transcript.toLowerCase().replaceAll("[^a-z ]", "");
+        this.embedding = APICalls.callEmbeddings(normal);
+    }
 
-        this.embedding = APICalls.callEmbeddings(normal);
-    }
-    public AudioInputEvent() {
-        this.input = null;
-        this.transcript = APICalls.callWhisper(SetEnv.get("USER_INPUT_FILE"));
-        String normal = transcript.toLowerCase().replaceAll("[^a-z ]", "");
-        this.embedding = APICalls.callEmbeddings(normal);
-    }
 
     public String getTranscript() { return transcript; }
 
@@ -41,10 +35,7 @@ public class AudioInputEvent {
                 '}';
     }
 
-    /**
-     * Returns the best matched command based on cosine similarity using streams.
-     * Falls back to "repeat options" if no match meets the threshold.
-     */
+
     public String matchCommand() {
         if (embedding == null || embedding.length == 0) {
             System.err.println("Error: User input embedding is null or empty. Cannot match command.");
@@ -70,6 +61,5 @@ public class AudioInputEvent {
                     return "error";
                 });
 
-        //TODO add a fallback in match command to send the keyset to chat gpt and match a likely match if emb returns null
     }
 }

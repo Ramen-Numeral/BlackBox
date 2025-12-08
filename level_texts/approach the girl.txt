@@ -1,0 +1,3 @@
+command : approach the girl
+speech text : A bus blows by, throwing watery slush into your face. You rub and rub but it won't come out of your eyes. As they well up, you see a familiar tangle of golden curls. And just as quickly, they are gone. Nobody, is on the other side of the road.
+available commands : keep walking

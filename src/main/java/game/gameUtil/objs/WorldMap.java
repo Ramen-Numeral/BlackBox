@@ -29,7 +29,6 @@ public final class WorldMap {
 
         worldMap.clear();
         commandEmbeddings.clear();
-        CommandUtil.initGlobalCommands();
 
         System.out.println("passed the clearing of maps");
 

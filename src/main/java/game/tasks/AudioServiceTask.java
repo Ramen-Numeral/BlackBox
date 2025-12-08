@@ -19,9 +19,6 @@ public class AudioServiceTask implements Runnable {
         this.maxBufferSize = maxBufferSize;
     }
 
-    public void stop() {
-        running.set(false);
-    }
 
     @Override
     public void run() {
@@ -44,7 +41,6 @@ public class AudioServiceTask implements Runnable {
                     if (sharedPreBuffer.size() > maxBufferSize) {
                         sharedPreBuffer.removeFirst();
                     }
-                   // System.out.println("[AudioService] Captured chunk, buffer size: " + sharedPreBuffer.size());
                 }
             }
         } catch (Exception e) {

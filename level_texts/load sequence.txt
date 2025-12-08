@@ -1,0 +1,3 @@
+command : load sequence
+speech text : Welcome to BlackBox. To avoid audio interference, please wear headphones. When you are ready to begin, say, "start a new game."
+

@@ -1,0 +1,3 @@
+command : user input error
+speech text : there has been an error in gathering your input. repeating the most recent level.
+available commands :

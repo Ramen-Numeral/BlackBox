@@ -4,13 +4,7 @@ import java.util.stream.IntStream;
 
 public class VectorComparison {
 
-    /**
-     * Computes cosine similarity between two vectors.
-     * Returns a value between -1 (opposite) and 1 (identical).
-     * @param ui The first vector.
-     * @param vi The second vector.
-     * @return The cosine similarity value.
-     */
+  //for embedding comparison
     public static double cosineSimilarity(double[] ui, double[] vi) {
         if (ui == null || vi == null)
             throw new IllegalArgumentException("Vectors must not be null");

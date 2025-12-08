@@ -1,3 +1,0 @@
-command : start
-speech text : this is the beginning of the game
-available commands : hello$lookup$menu

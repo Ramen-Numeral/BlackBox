@@ -6,17 +6,17 @@ import game.gameUtil.objs.WorldMap;
 
 import java.util.concurrent.BlockingQueue;
 
-/**
- * Runnable task for playing audio output for a given GameLevel.
- * Interruptible: if a new command arrives, playback will stop immediately.
- */
+
 public class AudioOutTask implements Runnable {
+
+    private String lastLevel;
 
     private final BlockingQueue<String>GUITextQueue;
     private final BlockingQueue<String> audioQueue;
     public AudioOutTask(BlockingQueue<String> audioInterruptQueue, BlockingQueue<String>GUITextQueue) {
         this.audioQueue = audioInterruptQueue;
         this.GUITextQueue = GUITextQueue;
+        this.lastLevel = "";
     }
 
 
@@ -24,15 +24,36 @@ public class AudioOutTask implements Runnable {
     public void run() {
         try {
             while(true) {
-                GameLevel level = WorldMap.getLevel((audioQueue.take()));
-                System.out.println("[OUTPUT THREAD] Starting playback for level: " + level.getCommand());
+                String command = audioQueue.take();
+
+                System.out.println("Audio out took from audio queue " + command);
+                //audioQueue.clear();
+                GameLevel level = WorldMap.getLevel(command);
                 String guiTxt = level.getNarrationText();
-
+                System.out.println("guiTxt put into the queue for output");
                 GUITextQueue.offer(guiTxt);
+                System.out.println("Audio running level " + level.toString());
 
-                // Play narration in chunks so we can check for interruption
+                //if theres a user input error, play that file and the previous one
+                //else continue and set the last played to the command for future repetition
+                //if user want to go back, load the last level
+                if(command.equals("user input error")){
+                    audioQueue.offer(lastLevel);
+                }
+                    lastLevel = command;
+                    level.setPlayed(true);
+
+
+                System.out.println("[OUTPUT THREAD] Starting playback for level: " + level.getCommand());
+                System.out.println("Putting GUI text on queue ");
+
+
                 LevelUtil.playNarrationAudio(level);
-                audioQueue.clear();
+                //introduce the choices
+                if(!command.equals("load sequence")) {
+                    LevelUtil.playNarrationAudio(WorldMap.getLevel("command intro"));
+                }
+                //play the choices
                 LevelUtil.playPromptChoices(level);
 
             }
@@ -44,18 +65,4 @@ public class AudioOutTask implements Runnable {
     }
 }
 
-
-/*
-            if (stopFlag.get()) {
-                System.out.println("[OUTPUT THREAD] Playback interrupted before prompt choices.");
-                return;
-            }
-
-            LevelUtil.playPromptChoices(level, stopFlag);
-
-            if (stopFlag.get()) {
-                System.out.println("[OUTPUT THREAD] Playback interrupted during prompt choices.");
-            }
-
- */
 

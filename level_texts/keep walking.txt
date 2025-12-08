@@ -1,0 +1,3 @@
+command : keep walking
+speech text : You open your hands and look at where the snow has touched your skin. You open and close your hands, as if trying to catch the last few seconds of beautiful. In a few days, the beta burns will start blooming across your knuckles, like a fighter in the eighth round. Your face will be slightly pocked. But right now you can mostly make yourself believe it is snowing, and you are beautiful in the end.
+available commands : exit$start a new game

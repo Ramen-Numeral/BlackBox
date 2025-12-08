@@ -9,11 +9,6 @@ public class TextOutTask implements Runnable {
     private final JTextArea textArea;
     private final long charDelayMs;
 
-    /**
-     * @param GUITextQueue The queue containing messages to display
-     * @param textArea The JTextArea in the terminal GUI
-     * @param charDelayMs Delay in milliseconds per character for typing effect
-     */
     public TextOutTask(BlockingQueue<String> GUITextQueue, JTextArea textArea, long charDelayMs) {
         this.GUITextQueue = GUITextQueue;
         this.textArea = textArea;
@@ -26,8 +21,7 @@ public class TextOutTask implements Runnable {
             while (!Thread.currentThread().isInterrupted()) {
                 // Wait for the next message
                 String message = GUITextQueue.take(); // blocks until a message is available
-                if(message.equals("loading..."));
-                textArea.setText("");
+                if(message.equals("loading...")) {textArea.setText("");}
                 // Append each character with typing effect
                 for (int i = 0; i < message.length(); i++) {
                     final String toAppend = String.valueOf(message.charAt(i));
@@ -44,7 +38,7 @@ public class TextOutTask implements Runnable {
                 SwingUtilities.invokeLater(() -> textArea.append("\n"));
             }
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt(); // exit gracefully
+            System.out.println("Gui thread interrupted exception");
         }
     }
 }

@@ -1,3 +1,0 @@
-command : tutorial
-speech text : Let’s go through the tutorial.
-available commands :

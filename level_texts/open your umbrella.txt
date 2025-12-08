@@ -1,0 +1,3 @@
+command : open your umbrella
+speech text : On your way out of the house this morning, you remembered that you'd left your umbrella at the office. Instead, you had to take your little sister's electric-yellow duck umbrella. The handle of the umbrella is slick and you struggle to get it open. It catches on a patch of rust in the center of the shaft. "Damn, rusted thing," you say. It pops open, too open. It's inside out. The snow keeps falling, and it strikes you that you look quite silly with an upside down rubber-ducky floating over your head.
+available commands : look over your shoulder$keep walking

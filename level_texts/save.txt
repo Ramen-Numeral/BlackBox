@@ -1,3 +1,0 @@
-command : save
-speech text : Your game has been saved.
-available commands :

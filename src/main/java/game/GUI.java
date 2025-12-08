@@ -21,8 +21,9 @@ public class GUI {
     private JTextArea textArea;
     private final BlockingQueue<String> messageQueue;
 
-    private static final int LEFT = 100, RIGHT = 150, TOP = 100, BOTTOM = 200;
+    private static final int LEFT = 100, RIGHT = 150, TOP = 125, BOTTOM = 295;
     private static final int WINDOW_SIZE = 800;
+    private final int CHAR_DELAY = 50;
 
     public GUI(BlockingQueue<String> messageQueue) {
         frame = new JFrame();
@@ -49,6 +50,7 @@ public class GUI {
         CRTPanel crt = new CRTPanel();
         crt.setLayout(new BorderLayout());
         crt.setBounds(LEFT, TOP, terminalWidth, terminalHeight);
+
 
         // Text Area
         textArea = new JTextArea();
@@ -99,7 +101,7 @@ public class GUI {
         JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 5));
         toolbar.setBackground(new Color(0,0,0,180));
         toolbar.setBounds(0,0,WINDOW_SIZE,30);
-        JButton closeBtn = new JButton("X");
+        JButton closeBtn = new JButton("x");
         closeBtn.setForeground(Color.WHITE);
         closeBtn.setContentAreaFilled(false);
         closeBtn.setBorderPainted(false);
@@ -125,16 +127,11 @@ public class GUI {
         frame.setVisible(true);
 
         // ---------------- TEXT OUTPUT TASK ----------------
-        new Thread(new TextOutTask(messageQueue, textArea, 80)).start();
-
-        // ---------------- LOOP "LOADING..." UNTIL QUEUE HAS MESSAGES ----------------
+        new Thread(new TextOutTask(messageQueue, textArea, CHAR_DELAY)).start();
 
     }
 
-
-
-
-    // ================= BlinkCaret =================
+    // ================= Caret =================
     static class BlinkCaret extends DefaultCaret {
         private boolean visible = true;
         private final int thickness = 6;

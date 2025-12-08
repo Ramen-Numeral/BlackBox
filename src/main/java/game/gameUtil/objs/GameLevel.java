@@ -36,10 +36,12 @@ public final class GameLevel implements Serializable {
         // Pad with 1 second silence front and back
         this.narrationAudio = addSilencePadding(rawNarration, 16000, 2, 1); // sampleRate=16kHz, bytesPerSample=2, seconds=1
         this.commandPromptAudio = addSilencePadding(rawCommandPrompt, 16000, 2, 1);
-
         this.embedding = APICalls.callEmbeddings(this.command);
         this.played = false;
     }
+
+    public boolean isAvailableCommand(String com){return availableCommands.contains(com);}
+
 
     public String getNarrationText(){return narrationTxt;}
 
@@ -55,7 +57,6 @@ public final class GameLevel implements Serializable {
 
     // --- Getters ---
     public String getCommand() { return command; }
-    public String getTxtPath() { return txtPath; }
     public byte[] getCommandPromptAudio() { return commandPromptAudio != null ? Arrays.copyOf(commandPromptAudio, commandPromptAudio.length) : null; }
     public byte[] getNarrationAudio() { return narrationAudio != null ? Arrays.copyOf(narrationAudio, narrationAudio.length) : null; }
     public double[] getEmbedding() { return embedding != null ? Arrays.copyOf(embedding, embedding.length) : null; }

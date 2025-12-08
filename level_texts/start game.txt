@@ -1,3 +1,0 @@
-command : start game
-speech text : Starting a new game.
-available commands :

@@ -1,3 +1,0 @@
-command : start
-speech text : Welcome to the adventure! Your journey begins here.
-available commands : forest$lookup$river

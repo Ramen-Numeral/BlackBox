@@ -1,0 +1,3 @@
+command : start a new game
+speech text : It’s snowing and you feel beautiful. Beautiful. That was never a word you would use to describe yourself; you never quite learned how to move your body right. Just might-could and knock-knees, almosts maybes and hand grenades and... well, you get it. But beautiful? The word rolls around in your mind. You begin to like it in its strange. Beautiful.
+available commands : open your umbrella$make a snow angel

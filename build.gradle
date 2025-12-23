@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'application'
 }
 
 repositories {
@@ -10,26 +11,12 @@ dependencies {
     implementation(platform("software.amazon.awssdk:bom:2.27.21"))
     implementation "software.amazon.awssdk:polly:2.32.10"
     implementation("com.openai:openai-java:4.8.0")
-    implementation 'software.amazon.awssdk:secretsmanager:2.22.26'
     implementation 'software.amazon.awssdk:regions:2.22.26'
 }
 
-// Compile to Java 8 bytecode
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
-jar {
-    manifest {
-        attributes 'Main-Class': 'game.Main'
-    }
-
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-
-    // Handle duplicates in META-INF
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-
-    archiveBaseName.set('BlackBox')
-    archiveVersion.set('1.0')
+application {
+    mainClass = 'game.Main'
 }

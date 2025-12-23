@@ -2,6 +2,7 @@ package game.stateRoutines.envsetup;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.stream.Stream;
@@ -26,6 +27,8 @@ public class SetEnv {
                                         line.substring(eqIdx + 1).trim());
                             }
                         });
+            } catch (NoSuchFileException e){
+                System.out.println("ERROR: .env.secrets file necessary to play game. Example available at .env.secrets.example. Continuing play will result in failure.");
             } catch (IOException e) {
                 e.printStackTrace();
                 System.out.println("Env file read error");

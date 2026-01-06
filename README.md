@@ -1,80 +1,112 @@
-/////////////////////////////////////
-a video demo of play is provided in the root at /demo.MOV
-////////////////////////////////////
+# Audio-Only Accessible Game
+**An immersive audio-command pipeline designed for visually impaired players.**
 
-This program requires: 
-- An OpenAI API key
-- AWS access key and secret
-- A properly formatted .env.secrets file in the working directory (.env.secrets.example provided)
+This project implements a multithreaded system that handles real-time ambient monitoring, rolling audio buffers, vector similarity, and AI-driven speech-to-text processing to create a gaming experience.
+A GUI experience is available, but not necessary for game play.
 
-Build Details
-Gradle is used for dependency management, including AWS and OpenAI SDKs.
+## Technical Specifications
 
-\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+### Core Engine & UI
+* **Language:** Java (JDK 8+)
+* **GUI Framework:** **Java Swing** 
+* **Build Tool:** **Gradle** 
 
-Compilation Instructions:
-This project uses the Gradle Wrapper. You do not need to install Gradle. When you run the wrapper commands below, Gradle will automatically create a .gradle directory (if one does not exist) and download the correct Gradle version locally. It does not install Gradle system-wide.
+### Audio Pipeline (Java Sound API)
+* **Input/Output:** **Java Sound API** via `javax.sound.sampled` to interface directly with system hardware for low-latency PCM audio capture and playback.
+* **Concurrency:** Implemented via the standard Java **Thread and Runnable interfaces** to manage non-blocking, simultaneous audio monitoring and processing.
 
-========================================
-Running the Project from the Command Line
+### AI & Cloud Integration (Official SDKs)
+* **Speech-to-Text:** **OpenAI Whisper** for user input resolution via the OpenAI Java SDK.
+* **Command Logic:** **OpenAI Embeddings** for semantic vector comparison via the OpenAI Java SDK.
+* **Narrative Voice:** **Amazon Polly** via the AWS Java SDK to generate system speech.
 
-Build the project:
-- Mac/Linux:
-- ./gradlew build
-- Windows:
-- gradlew.bat build
+---
 
-Run the project:
-- Mac/Linux:
-- ./gradlew run
-- Windows:
-- gradlew.bat run
+## Prerequisites
+Before running the application, ensure you have the following credentials and files:
+* **OpenAI API Key:** Required for Whisper Speech-to-Text (STT) and text embeddings.
+* **AWS Credentials:** Access Key and Secret required for AWS Polly (TTS) integration.
+* **Environment Configuration:** A `.env.secrets` file must be present in the working directory. Refer to `.env.secrets.example` for the required schema.
 
-All dependencies will be included in the wrapper.
+> [!CAUTION]
+> If the `.env.secrets` file is missing, the program will throw a `FileNotFoundException`. While the GUI may still load, any speech input will trigger a cascade of errors as the API calls fail.
 
-========================================
+---
 
-Running the Project Inside an IDE
+##  Build & Compilation
+This project utilizes the **Gradle Wrapper** to handle dependencies. No library installations are required.
 
-Open the project folder in your IDE.
-- The IDE should automatically detect that this is a Gradle project.
-- When prompted, import or load the project as a Gradle project.
-- Allow the IDE to finish its Gradle sync. This will download any needed dependencies.
-- After the sync finishes, open the class that contains the main method.
-- Use the IDE’s normal Run/Play button to run the Main class.
-- You may optionally run "./gradlew build" in the ide terminal before opening the project to ensure dependencies are ready.
+### Command Line Instructions
+**1. Build the project:**
+* **Mac/Linux:** `./gradlew build`
+* **Windows:** `gradlew.bat build`
 
-=======================================
+**2. Run the project:**
+* **Mac/Linux:** `./gradlew run`
+* **Windows:** `gradlew.bat run`
 
-Successful Compilation:
-If the program has successfully compiled, you will see a small interface in the center of the screen asking to enter a decibel threshold. 
-After you select your threshold 
+### IDE Integration
+1. Open the project folder in your IDE (IntelliJ IDEA or Eclipse).
+2. Import/Load the project as a **Gradle project** when prompted.
+3. Allow the IDE to complete the **Gradle Sync** to download SDKs and dependencies.
+4. Locate the `Main` class and use the IDE's **Run** button.
 
-- +1-2 decibels above the ambient level should be appropriate. There is tolerance for falsely triggered speech input;
-even if speech is falsely detected, the game will recognize
-it as an invalid command and ignore it up to the error threshold that prevent infinite speech detection looping (20 errors)
-- If the microphone is not picking up on your speech, try restarting the game and lowering the threshold.
-- Note that a negative readout is normal. This is the "unity gain" on the input line.
+---
 
-After you select the threshold, the main gui will show and the audio will begin.
+## System Calibration
+Upon startup, a calibration interface will appear to configure the audio input sensitivity.
 
-If there is no .env.secrets file in the root directory, a file not found exception will be thrown. 
-The game will still appear, but any attempted speech input will throw a domino effect of errors.
 
-========================================
+### Decibel Thresholding
+1. **Selection:** Choose a threshold **+3-5 decibels** above the ambient room noise.
+2. **Unity Gain:** Note that negative readouts are normal; this represents the "unity gain" on the input line.
+3. **Input Tolerance:** The system includes logic to ignore false triggers and unmatched commands. To prevent infinite loops, the system will automatically ignore invalid detection after 20 consecutive errors.
 
-Overview
-This project is an audio command pipeline. The system operates through several tasks:
-1. Ambient Decibel Monitoring:
-   A background thread continually measures ambient sound levels. When the user speaks above a defined threshold, it triggers the recorder.
-2. Rolling Pre-buffer Recorder:
-   Another thread constantly records a rolling audio buffer. When a trigger occurs, this buffer is appended to the new recording to capture audio just before activation.
-3. Audio Input Event Processing:
-   When recording completes, an Audio Input Event is created. Inside this event, Whisper is used for speech-to-text, embeddings are generated, and the text is matched to a command key.
-4. Command Queue:
-   The resolved command is pushed to the Command Task Queue. To prevent outdated responses, the queue is cleared each time a new valid command is added.
-5. Audio Output Task:
-   Commands are forwarded to an audio-out thread. This task places text into the TextOutTask queue so the GUI can display output in real time as the level or sequence plays.
-6. Text Output Task:
-   Outputs text to the GUI as the audio plays.
-The terminal should show output as the game progresses so the thread activity can be traced.
+---
+## Game Play
+
+>As an audio-first experience, the narrative-progression relies entirely on voice commands and audio feedback.
+
+### Basic Controls
+The system matches your speech against vectorized embeddings to trigger game actions.
+* **Navigation:** When player input is necessary to progress the game, the system will prompt the user with the available commands and wait for input to continue.
+* **Interaction:** The user will speak their command out loud. For example: "Open door," "Pick up item," or "Search room."
+* **Exit & Restart:** Should the user want to start a new game or exit the system, they can say "Exit" or "Start a New Game" at any point in time.
+
+---
+
+## Technical Architecture
+The core of this project is a high-concurrency audio pipeline managed across several dedicated threads:
+
+### 1. Ambient Monitoring
+A background thread continuously samples sound levels. When input crosses the calibrated threshold, it signals the recording state to begin.
+
+### 2. Rolling Pre-buffer Recorder
+To prevent "clipping" at the start of user speech, a thread maintains a constant rolling buffer. When triggered, this buffer is prepended to the new recording to ensure the full command is captured.
+
+### 3. Audio Input Event Processing
+Once a recording is complete, an AIE is dispatched for analysis:
+* **OpenAI Whisper:** Converts the audio waveform to text.
+* **Vectorized Embeddings:** Compares the text against valid command keys using vector similarity.
+
+
+### 4. Command & Task Queuing
+* **Command Queue:** Validated commands are pushed to a task queue. The queue is cleared with every new valid command to prioritize the most recent user intent.
+* **Audio/Text Sync:** The **Audio Output Task** (AWS Polly) and **Text Output Task** (GUI) run in parallel, ensuring the screen reader and visual display remain synchronized.
+
+--- 
+
+## Technical Challenges & Solutions
+
+### The "Infinite Loop" Problem
+**Challenge:** Background noise or AWS/OpenAI latency occasionally triggered the recording state without a valid user command, creating an infinite loop of API calls.
+**Solution:** Implemented an **Error Threshold Counter**. The system tracks sequential "Null" or "Invalid" command resolutions; upon reaching 20 errors, the pipeline resets.
+
+### Eliminating Command "Clipping"
+**Challenge:** Standard voice triggers often lose the first 200-500ms of audio, causing Whisper to fail on short commands like "Go."
+**Solution:** Developed a **Rolling Pre-buffer**. By maintaining a continuous 1-second audio stream in memory, the system "rewinds" slightly upon trigger detection, ensuring the full phoneme sequence is captured for analysis.
+
+---
+
+### Terminal Trace
+The terminal provides real-time logs of thread activity, allowing developers to trace the lifecycle of an audio event from "Ambient Trigger," to "API Response," to "Command Execution."
